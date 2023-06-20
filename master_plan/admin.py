@@ -1,7 +1,7 @@
 from django.contrib import admin
-from .models import work_axe, activitie, responsible, date
+from .models import Work_axe, Activitie, Responsible, Date
 
-admin.site.register(work_axe)
-admin.site.register(activitie)
-admin.site.register(responsible)
-admin.site.register(date)
+admin.site.register(Work_axe)
+admin.site.register(Activitie)
+admin.site.register(Responsible)
+admin.site.register(Date)
