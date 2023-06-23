@@ -13,7 +13,7 @@ class Activitie(models.Model):
 
     """ Activity model for the task """
 
-    work_axe = models.ForeignKey(to=WorkAxe, default="", on_delete=models.SET_DEFAULT, verbose_name='Eje de trabajo')
+    work_axe = models.ForeignKey(to=WorkAxe, null=True, blank=True, on_delete=models.SET_NULL, verbose_name='Eje de trabajo')
     name = models.TextField(null=False, blank=False, verbose_name='Nombre')
     
     def __str__(self):
@@ -32,9 +32,9 @@ class Date(models.Model):
 
     """ Date model for the task """
         
-    activitie = models.ForeignKey(to=Activitie, default="", on_delete=models.SET_DEFAULT)
+    activitie = models.ForeignKey(to=Activitie, null=True, blank=True, on_delete=models.SET_NULL)
     date = models.DateField(null=False, blank=False)
-    responsible = models.ForeignKey(to=Responsible, default="", on_delete=models.SET_DEFAULT)
+    responsible = models.ForeignKey(to=Responsible, null=True, blank=True, on_delete=models.SET_NULL)
     date_made = models.DateField(null=True, blank=True)
     evaluation = models.CharField(max_length=75, null=True, blank=True)
     observations = models.TextField(null=True, blank=True)
@@ -59,9 +59,9 @@ class Detail(models.Model):
     """ Detail model for an entire project info """
 
     master_plan = models.ForeignKey(to=MasterPlan, on_delete=models.CASCADE, verbose_name='Master plan')
-    work_axe = models.ForeignKey(to=WorkAxe, default="", on_delete=models.SET_DEFAULT, verbose_name='Eje de trabajo')
-    activity = models.ForeignKey(to=Activitie, default="", on_delete=models.SET_DEFAULT, verbose_name='Actividad')
-    responsible = models.ForeignKey(to=Responsible, default="", on_delete=models.SET_DEFAULT, verbose_name='Responsable')
+    work_axe = models.ForeignKey(to=WorkAxe, null=True, blank=True, on_delete=models.SET_NULL, verbose_name='Eje de trabajo')
+    activity = models.ForeignKey(to=Activitie, null=True, blank=True, on_delete=models.SET_NULL, verbose_name='Actividad')
+    responsible = models.ForeignKey(to=Responsible, null=True, blank=True, on_delete=models.SET_NULL, verbose_name='Responsable')
     scheduled_date = models.DateField(null=False, blank=False, verbose_name='Fecha programada')
     completed_date = models.DateField(null=False, blank=False, verbose_name='Fecha completada')
     evaluation = models.TextField(null=True, blank=True, verbose_name='Evaluación')
