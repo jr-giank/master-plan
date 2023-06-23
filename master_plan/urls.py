@@ -21,5 +21,9 @@ from . import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.index, name='home'),
-    # path('work/axe/', views.Work_axe, name='work-axe')
+    path('work/axe/', views.CreateWorkAxeView, name='create-work-axe'),
+    path('responsible/', views.CreateResponsibleView, name='create-responsible'),
+    path('activity/', views.CreateActivityView, name='create-activity'),
+    path('master/plan/', views.CreateMasterPlanView, name='create-master-plan'), 
+    path('detail/', views.CreateDetailView, name='create-detail'), 
 ]

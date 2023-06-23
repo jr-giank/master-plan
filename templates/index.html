@@ -30,16 +30,17 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ml-auto">
                 <li class="nav-item active">
-                    <a class="nav-link text-white" href="#">Eje de trabajo</a>
+                    <a class="nav-link text-white" href="{% url 'create-work-axe' %}">Eje de trabajo</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link text-white" href="#">Actividad</a>
+                    <a class="nav-link text-white" href="{% url 'create-activity' %}">Actividad</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link text-white" href="#">Responsable</a>
+                    <a class="nav-link text-white" href="{% url 'create-responsible' %}">Responsable</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link text-white" href="#">Fechas</a>
+                    <!-- <a class="nav-link text-white" href="{% url 'master-plan' %}">Master plan</a> -->
+                    <a class="nav-link text-white" href="{% url 'create-master-plan' %}">Master plan</a>
                 </li>
             </ul>
         </div>
@@ -51,7 +52,7 @@
             <th scope="col" class="text-center fs-5">Ejes de trabajo</th>
             <th scope="col" class="text-center fs-5">Actividades</th>
             <th scope="col" class="text-center fs-5">Fechas - Fecha realizado - Evaluación - Observaciones</th>
-            <th scope="col" class="text-center fs-4">Responsables</th>
+            <th scope="col" class="text-center fs-5">Responsables</th>
           </tr>
         </thead>
         <tbody>
