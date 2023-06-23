@@ -2,11 +2,12 @@
 <html lang="en">
 <head>
     {% load static %}
+    {% load custom_tags %}
     {% load i18n %}
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
-    <title>Home</title>
+    <title>Registros</title>
     <style>
         .navbar {
             position: relative;
@@ -30,17 +31,16 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ml-auto">
                 <li class="nav-item active">
-                    <a class="nav-link text-white" href="{% url 'create-work-axe' %}">Eje de trabajo</a>
+                    <a class="nav-link text-white" href="{% url 'work-axe-create' %}">Eje de trabajo</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link text-white" href="{% url 'create-activity' %}">Actividad</a>
+                    <a class="nav-link text-white" href="{% url 'activity-create' %}">Actividad</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link text-white" href="{% url 'create-responsible' %}">Responsable</a>
+                    <a class="nav-link text-white" href="{% url 'responsible-create' %}">Responsable</a>
                 </li>
                 <li class="nav-item">
-                    <!-- <a class="nav-link text-white" href="{% url 'master-plan' %}">Master plan</a> -->
-                    <a class="nav-link text-white" href="{% url 'create-master-plan' %}">Master plan</a>
+                    <a class="nav-link text-white" href="{% url 'master-plan-create' %}">Master plan</a>
                 </li>
             </ul>
         </div>
@@ -49,33 +49,22 @@
     <table class="table">
         <thead>
           <tr>
-            <th scope="col" class="text-center fs-5">Ejes de trabajo</th>
-            <th scope="col" class="text-center fs-5">Actividades</th>
-            <th scope="col" class="text-center fs-5">Fechas - Fecha realizado - Evaluación - Observaciones</th>
-            <th scope="col" class="text-center fs-5">Responsables</th>
+            {% for field in records_name %}
+                <th scope="col" class="text-center fs-5">{{ field.verbose_name }}</th>
+            {% endfor %}
+            <th scope="col" class="text-center fs-5">Acciones</th>
           </tr>
         </thead>
         <tbody>
-          {% for activity in activities%}
+          {% for record in records %}
             <tr>
-                <th scope="row" class="text-center">{{activity.activitie.work_axe}}</th>
-                <td class="text-center">{{activity.activitie}}</td>
-                <td class="text-center">
-                    {{activity.date}}
-                    
-                    {% if activity.date_made %}
-                        - {{activity.date_made}}
-                    {% endif %}
-
-                    {% if activity.evaluation %}
-                        - {{activity.evaluation}}
-                    {% endif %}
-
-                    {% if activity.observations %}
-                        - {{activity.observations}}
-                    {% endif %}
+                {% for field in records_name %}
+                    <td scope="col" class="text-center">{{ record|getattr_filter:field.name }}</td>
+                {% endfor %}
+                <td class="col text-center">
+                    <button class="btn btn-success mb-1 p-0"><a href='{{ request.build_absolute_uri }}update/{{record.pk}}/' class="page-link border-0 bg-success text-white py-1 mx-2">Modificar</a></button>
+                    <button class="btn btn-danger mb-1 p-0"><a href="#" class="page-link border-0 bg-danger text-white py-1 mx-2">Eliminar</a></button>
                 </td>
-                <td class="text-center">{{activity.responsible}}</td>
             </tr>
           {% endfor %}
         </tbody>
