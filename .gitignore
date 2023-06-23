@@ -1,6 +1,6 @@
 #General
 /venv
-# master_plan/.env
+master_plan/.env
 
 #Cached
 master_plan/__pycache__
