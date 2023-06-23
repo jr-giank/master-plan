@@ -4,10 +4,9 @@ from .models import Date, WorkAxe, Activitie, Responsible, MasterPlan, Detail
 
 def HomeView(request):
 
-    records = Date.objects.all().order_by('date')
-    records_name = Date._meta.fields
-            
-    return render(request=request, template_name='list.html', context={'records': records, 'records_name': records_name})
+    records = MasterPlan.objects.values('id', 'name', 'date_created')
+    
+    return render(request=request, template_name='home.html', context={'records': records})
 
 # WorkAxe Logic Views
 def ListWorkAxeView(request):
@@ -27,7 +26,7 @@ def CreateWorkAxeView(request):
             work_axe.name = request.POST['name']
             work_axe.save()
 
-            return redirect('home')
+            return redirect('work-axe')
     else:
         form = WorkAxeForm()
 
@@ -50,6 +49,17 @@ def UpdateWorkAxeView(request, pk):
 
     return render(request=request, template_name='update.html', context={'form': form})
 
+def DeleteWorkAxeView(request, pk):
+
+    record = WorkAxe.objects.get(id=pk)
+    
+    if request.POST:
+        record.delete()
+
+        return redirect('work-axe')
+
+    return render(request=request, template_name='delete.html')
+
 # Activity Logic Views
 def ListActivityView(request):
 
@@ -67,7 +77,7 @@ def CreateActivityView(request):
             work_axe = WorkAxe.objects.get(id=request.POST['work_axe'])
             activity = Activitie.objects.create(work_axe=work_axe, name=request.POST['name'])
             
-            return redirect('home')
+            return redirect('activity')
     else:
         form = ActivitieForm()
 
@@ -111,7 +121,7 @@ def CreateResponsibleView(request):
             responsible.name = request.POST['name']
             responsible.save()
 
-            return redirect('home')
+            return redirect('responsible')
     else:
         form = ResponsibleForm()
 
@@ -154,7 +164,7 @@ def CreateMasterPlanView(request):
             master_plan.notes = request.POST['notes']
             master_plan.save()
 
-            return redirect('home')
+            return redirect('master-plan')
     else:
         form = MasterPlanForm()
 
@@ -213,7 +223,7 @@ def CreateDetailView(request):
                 observations = request.POST['observations']
             )
 
-            return redirect('home')
+            return redirect('detail')
     else:
         form = DetailForm()
 

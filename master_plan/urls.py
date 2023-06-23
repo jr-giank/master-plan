@@ -25,20 +25,25 @@ urlpatterns = [
     path('work/axe/', views.ListWorkAxeView, name='work-axe'),
     path('work/axe/create/', views.CreateWorkAxeView, name='work-axe-create'),
     path('work/axe/update/<int:pk>/', views.UpdateWorkAxeView, name='work-axe-update'),
+    path('work/axe/delete/<int:pk>/', views.DeleteWorkAxeView, name='work-axe-delete'),
 
     path('responsible/', views.ListResponsibleView, name='responsible'),
     path('responsible/create/', views.CreateResponsibleView, name='responsible-create'),
     path('responsible/update/<int:pk>/', views.UpdateResponsibleView, name='responsible-update'),
+    # path('responsible/delete/<int:pk>/', views.deleteResponsibleView, name='responsible-delete'),
 
     path('activity/', views.ListActivityView, name='activity'),
     path('activity/create/', views.CreateActivityView, name='activity-create'),
     path('activity/update/<int:pk>/', views.UpdateActivityView, name='activity-update'),
+    # path('responsible/delete/<int:pk>/', views.UpdateResponsibleView, name='responsible-delete'),
 
     path('master/plan/', views.ListMasterPlanView, name='master-plan'),
     path('master/plan/create/', views.CreateMasterPlanView, name='master-plan-create'),
     path('master/plan/update/<int:pk>/', views.UpdateMasterPlanView, name='master-plan-update'),
+    # path('responsible/delete/<int:pk>/', views.UpdateResponsibleView, name='responsible-delete'),
 
     path('detail/', views.ListDetailView, name='detail'),
     path('detail/create/', views.CreateDetailView, name='detail-create'), 
     path('detail/update/<int:pk>/', views.UpdateDetailView, name='detail-update'),
+    # path('responsible/delete/<int:pk>/', views.UpdateResponsibleView, name='responsible-delete'),
 ]
