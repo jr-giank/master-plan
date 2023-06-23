@@ -4,7 +4,7 @@ class WorkAxe(models.Model):
 
     """ Work axes model for the task """
 
-    name = models.CharField(max_length=75, null=False, blank=False)
+    name = models.CharField(max_length=75, null=False, blank=False, verbose_name='Nombre')
 
     def __str__(self):
         return self.name
@@ -13,8 +13,8 @@ class Activitie(models.Model):
 
     """ Activity model for the task """
 
-    work_axe = models.ForeignKey(to=WorkAxe, default="", on_delete=models.SET_DEFAULT)
-    name = models.TextField(null=False, blank=False)
+    work_axe = models.ForeignKey(to=WorkAxe, default="", on_delete=models.SET_DEFAULT, verbose_name='Eje de trabajo')
+    name = models.TextField(null=False, blank=False, verbose_name='Nombre')
     
     def __str__(self):
         return self.name
@@ -23,7 +23,7 @@ class Responsible(models.Model):
     
     """ Responsible model to say the responsible person for complete the task """
     
-    name = models.CharField(max_length=75, null=False, blank=False)
+    name = models.CharField(max_length=75, null=False, blank=False, verbose_name='Nombre')
 
     def __str__(self):
         return self.name
@@ -46,10 +46,10 @@ class MasterPlan(models.Model):
 
     """ Master plan model for a project """
 
-    name = models.CharField(max_length=75, null=False, blank=False)
-    description = models.TextField(null=True, blank=True)
-    date_created = models.DateField(auto_now_add=True)
-    notes = models.TextField(null=True, blank=True)
+    name = models.CharField(max_length=75, null=False, blank=False, verbose_name='Nombre')
+    description = models.TextField(null=True, blank=True, verbose_name='Descripción')
+    date_created = models.DateField(auto_now_add=True, verbose_name='Fecha creación')
+    notes = models.TextField(null=True, blank=True, verbose_name='Notas')
 
     def __str__(self):
         return f"{self.name}"
@@ -58,14 +58,14 @@ class Detail(models.Model):
 
     """ Detail model for an entire project info """
 
-    master_plan = models.ForeignKey(to=MasterPlan, on_delete=models.CASCADE)
-    work_axe = models.ForeignKey(to=WorkAxe, default="", on_delete=models.SET_DEFAULT)
-    activity = models.ForeignKey(to=Activitie, default="", on_delete=models.SET_DEFAULT)
-    responsible = models.ForeignKey(to=Responsible, default="", on_delete=models.SET_DEFAULT)
-    scheduled_date = models.DateField(null=False, blank=False)
-    completed_date = models.DateField(null=False, blank=False)
-    evaluation = models.TextField(null=True, blank=True)
-    observations = models.TextField(null=False, blank=False)
+    master_plan = models.ForeignKey(to=MasterPlan, on_delete=models.CASCADE, verbose_name='Master plan')
+    work_axe = models.ForeignKey(to=WorkAxe, default="", on_delete=models.SET_DEFAULT, verbose_name='Eje de trabajo')
+    activity = models.ForeignKey(to=Activitie, default="", on_delete=models.SET_DEFAULT, verbose_name='Actividad')
+    responsible = models.ForeignKey(to=Responsible, default="", on_delete=models.SET_DEFAULT, verbose_name='Responsable')
+    scheduled_date = models.DateField(null=False, blank=False, verbose_name='Fecha programada')
+    completed_date = models.DateField(null=False, blank=False, verbose_name='Fecha completada')
+    evaluation = models.TextField(null=True, blank=True, verbose_name='Evaluación')
+    observations = models.TextField(null=False, blank=False, verbose_name='Observaciones')
 
     def __str__(self):
 

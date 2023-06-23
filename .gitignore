@@ -4,6 +4,8 @@ master_plan/.env
 
 #Cached
 master_plan/__pycache__
+master_plan/migrations/__pycache__
+master_plan/templatetags/__pycache__
 
 #Database
 db.sqlite3

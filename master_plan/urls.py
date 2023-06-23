@@ -20,10 +20,25 @@ from . import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', views.index, name='home'),
-    path('work/axe/', views.CreateWorkAxeView, name='create-work-axe'),
-    path('responsible/', views.CreateResponsibleView, name='create-responsible'),
-    path('activity/', views.CreateActivityView, name='create-activity'),
-    path('master/plan/', views.CreateMasterPlanView, name='create-master-plan'), 
-    path('detail/', views.CreateDetailView, name='create-detail'), 
+    path('', views.HomeView, name='home'),
+
+    path('work/axe/', views.ListWorkAxeView, name='work-axe'),
+    path('work/axe/create/', views.CreateWorkAxeView, name='work-axe-create'),
+    path('work/axe/update/<int:pk>/', views.UpdateWorkAxeView, name='work-axe-update'),
+
+    path('responsible/', views.ListResponsibleView, name='responsible'),
+    path('responsible/create/', views.CreateResponsibleView, name='responsible-create'),
+    path('responsible/update/<int:pk>/', views.UpdateResponsibleView, name='responsible-update'),
+
+    path('activity/', views.ListActivityView, name='activity'),
+    path('activity/create/', views.CreateActivityView, name='activity-create'),
+    path('activity/update/<int:pk>/', views.UpdateActivityView, name='activity-update'),
+
+    path('master/plan/', views.ListMasterPlanView, name='master-plan'),
+    path('master/plan/create/', views.CreateMasterPlanView, name='master-plan-create'),
+    path('master/plan/update/<int:pk>/', views.UpdateMasterPlanView, name='master-plan-update'),
+
+    path('detail/', views.ListDetailView, name='detail'),
+    path('detail/create/', views.CreateDetailView, name='detail-create'), 
+    path('detail/update/<int:pk>/', views.UpdateDetailView, name='detail-update'),
 ]
