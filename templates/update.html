@@ -131,12 +131,32 @@
                                 {% endif %}
                             {% endfor %}
                         </select>
+
+                        {% for error in field.errors %}
+                            <p class="text-danger">{{ error }}</p>
+                        {% endfor %}
                     {% elif field.field.widget.input_type == 'text' %}
                         <label for="{{ field.name }}">{{ field.label_tag }}</label>
                         <input
                             type="text"
                             value="{{ field.value|default_if_none:'' }}"
-                            name="{{ field.name }}"/>
+                            name="{{ field.name }}"
+                        />
+
+                        {% for error in field.errors %}
+                            <p class="text-danger">{{ error }}</p>
+                        {% endfor %}
+                    {% elif field.field.widget.input_type == 'date'%}
+                        <label for="{{ field.name }}">{{ field.label_tag }}</label>
+                        <input
+                            type="date"
+                            value="{{ field.value|default_if_none:'' }}"
+                            name="{{ field.name }}"
+                        />
+
+                        {% for error in field.errors %}
+                            <p class="text-danger">{{ error }}</p>
+                        {% endfor %}
                     {% elif field.field.widget.input_type != 'text' and field.field.widget.input_type != 'select'%}
                         <label for="{{ field.name }}">{{ field.label_tag }}</label>
                         <textarea 
@@ -144,11 +164,12 @@
                             value="{{ field.value|default_if_none:'' }}"
                             rows="4"
                             style="text-align: left;">{{ field.value }}</textarea>
+                        
+                        {% for error in field.errors %}
+                            <p class="text-danger">{{ error }}</p>
+                        {% endfor %}
                     {% endif %}
                 </div>
-                {% for error in form.field.errors %}
-                    <li>{{ error }}</li>
-                {% endfor %}
             {% endfor %}
 
             <button type="submit">Enviar</button>

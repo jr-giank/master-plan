@@ -1,100 +1,68 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    {% load static %}
-    {% load custom_tags %}
-    {% load i18n %}
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
-    <title>Registros</title>
-    <style>
+  {% load static %}
+  {% load custom_tags %}
+  {% load i18n %}
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+  <title>Registros</title>
+  <style>
+    .container-fluid,
+    .container-fluid ul {
+      background-color: #306191;
+    }
 
-        .container-fluid,
-        .container-fluid ul{
-            background-color: #306191;
-        }
+    .dropdown-item:hover {
+      background-color: #5f86ad;
+    }
 
-        .dropdown-item:hover {
-            background-color: #5f86ad;
-        }
-    </style>
+    .btn:hover{
+      transform: scale(1.05);
+    }
+  </style>
 </head>
+
 <body>
-    <nav class="navbar navbar-expand-lg mt-0 bg-body-tertiary">
-        <div class="container-fluid mt-0">
-          <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0 mt-0">
-              <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle text-white" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                  Eje de trabajo
-                </a>
-                <ul class="dropdown-menu">
-                  <li><a class="dropdown-item text-white" href="{% url 'work-axe' %}">Listar Ejes</a></li>
-                  <li><a class="dropdown-item text-white" href="{% url 'work-axe-create' %}">Crear Eje</a></li>
-                </ul>
-              </li>
-              <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle text-white" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                  Actividades
-                </a>
-                <ul class="dropdown-menu">
-                  <li><a class="dropdown-item text-white" href="{% url 'activity' %}">Listar Actividades</a></li>
-                  <li><a class="dropdown-item text-white" href="{% url 'activity-create' %}">Crear Actividad</a></li>
-                </ul>
-              </li>
-              <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle text-white" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                  Responsables
-                </a>
-                <ul class="dropdown-menu">
-                  <li><a class="dropdown-item text-white" href="{% url 'responsible' %}">Listar Responsables</a></li>
-                  <li><a class="dropdown-item text-white" href="{% url 'responsible-create' %}">Crear Responsable</a></li>
-                </ul>
-              </li>
-              <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle text-white" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                  Master plan
-                </a>
-                <ul class="dropdown-menu">
-                  <li><a class="dropdown-item text-white" href="{% url 'master-plan' %}">Master Plan</a></li>
-                  <li><a class="dropdown-item text-white" href="{% url 'master-plan-create' %}">Crear Master Plan</a></li>
-                </ul>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </nav>
+  {% include 'nav.html' %}
 
-    <table class="table">
-        <thead>
-          <tr>
-            {% for field in records_name %}
-                <th scope="col" class="text-center fs-5">{{ field.verbose_name }}</th>
-            {% endfor %}
-            <th scope="col" class="text-center fs-5">Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for record in records %}
-            <tr>
-                {% for field in records_name %}
-                    <td scope="col" class="text-center">{{ record|getattr_filter:field.name }}</td>
-                {% endfor %}
-                <td class="col text-center">
-                    <button class="btn btn-success mb-1 p-0"><a href='{{ request.build_absolute_uri }}update/{{record.pk}}/' class="page-link border-0 bg-success text-white py-1 mx-2">Modificar</a></button>
-                    <button class="btn btn-danger mb-1 p-0"><a href='{{ request.build_absolute_uri }}delete/{{record.pk}}/' class="page-link border-0 bg-danger text-white py-1 mx-2">Eliminar</a></button>
-                </td>
-            </tr>
-          {% endfor %}
-        </tbody>
-    </table>
+  <table class="table">
+    <thead>
+      <tr>
+        {% for field in records_name %}
+        <th scope="col" class="text-center fs-5">{{ field.verbose_name }}</th>
+        {% endfor %}
+        <th scope="col" class="text-center fs-5">Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for record in records %}
+      <tr>
+        {% for field in records_name %}
+        <td scope="col" class="text-center">{{ record|getattr_filter:field.name }}</td>
+        {% endfor %}
+        <td class="col text-center">
+          {% if request.path == '/' %}
+            <a href='{{ request.build_absolute_uri }}master/plan/details/{{record.id}}/' class="page-link border-0 bg-warning text-white d-inline-block py-1 px-2 mx-2 mb-1 btn">Ver</a></button>
+          {% endif %}
+          <a href='{{ request.build_absolute_uri }}update/{{record.pk}}/' class="page-link border-0 bg-success text-white d-inline-block p-1 mx-2 mb-1 btn">Modificar</a>
+          <a href='{{ request.build_absolute_uri }}delete/{{record.pk}}/' class="page-link border-0 bg-danger text-white d-inline-block p-1 mx-2 mb-1 btn">Eliminar</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
 
-    <!-- Incluir archivos de Bootstrap -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz"
+    crossorigin="anonymous"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
 </body>
+
 </html>

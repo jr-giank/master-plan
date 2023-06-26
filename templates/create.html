@@ -93,7 +93,6 @@
             background-color: rgba(204, 0, 0, 0.904);            
             color: white;
             padding: 5px 4px 5px 4px;
-            /* margin-top: 2vh; */
             margin-bottom: 4vh;
             border-radius: 6px;
             border: none;
@@ -126,12 +125,32 @@
                                 <option value="{{ choice.0 }}">{{ choice.1 }}</option>
                             {% endfor %}
                         </select>
+
+                        {% for error in field.errors %}
+                            <p class="text-danger">{{ error }}</p>
+                        {% endfor %}
                     {% elif field.field.widget.input_type == 'text' %}
                         <label for="{{ field.name }}">{{ field.label_tag }}</label>
                         <input
                             type="text"
                             value="{{ field.value|default_if_none:'' }}"
-                            name="{{ field.name }}"/>
+                            name="{{ field.name }}"
+                        />
+                        
+                        {% for error in field.errors %}
+                            <p class="text-danger">{{ error }}</p>
+                        {% endfor %}
+                    {% elif field.field.widget.input_type == 'date'%}
+                        <label for="{{ field.name }}">{{ field.label_tag }}</label>
+                        <input
+                            type="date"
+                            value="{{ field.value|default_if_none:'' }}"
+                            name="{{ field.name }}"
+                        />
+                        
+                        {% for error in field.errors %}
+                            <p class="text-danger">{{ error }}</p>
+                        {% endfor %}
                     {% elif field.field.widget.input_type != 'text' and field.field.widget.input_type != 'select'%}
                         <label for="{{ field.name }}">{{ field.label_tag }}</label>
                         <textarea 
@@ -139,18 +158,21 @@
                             value="{{ field.value|default_if_none:'' }}"
                             rows="4"
                             style="text-align: left;"></textarea>
+                        {% for error in field.errors %}
+                            <p class="text-danger">{{ error }}</p>
+                        {% endfor %}
                     {% endif %}
                 </div>
-                {% for error in form.field.errors %}
-                    <li>{{ error }}</li>
-                {% endfor %}
             {% endfor %}
 
             <button type="submit">Enviar</button>
-            <a href="/" class="btn btn-outline-danger cancel">Cancelar</a>
+            <a href="javascript:history.back()" class="btn btn-outline-danger cancel">Cancelar</a>
         </form>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>

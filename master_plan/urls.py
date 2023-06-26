@@ -20,7 +20,6 @@ from . import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', views.HomeView, name='home'),
 
     path('work/axe/', views.ListWorkAxeView, name='work-axe'),
     path('work/axe/create/', views.CreateWorkAxeView, name='work-axe-create'),
@@ -30,20 +29,21 @@ urlpatterns = [
     path('responsible/', views.ListResponsibleView, name='responsible'),
     path('responsible/create/', views.CreateResponsibleView, name='responsible-create'),
     path('responsible/update/<int:pk>/', views.UpdateResponsibleView, name='responsible-update'),
-    # path('responsible/delete/<int:pk>/', views.deleteResponsibleView, name='responsible-delete'),
+    path('responsible/delete/<int:pk>/', views.DeleteResponsibleView, name='responsible-delete'),
 
     path('activity/', views.ListActivityView, name='activity'),
     path('activity/create/', views.CreateActivityView, name='activity-create'),
     path('activity/update/<int:pk>/', views.UpdateActivityView, name='activity-update'),
-    # path('responsible/delete/<int:pk>/', views.UpdateResponsibleView, name='responsible-delete'),
+    path('activity/delete/<int:pk>/', views.DeleteActivityView, name='activity-delete'),
 
-    path('master/plan/', views.ListMasterPlanView, name='master-plan'),
+    path('', views.ListMasterPlanView, name='master-plan'),
     path('master/plan/create/', views.CreateMasterPlanView, name='master-plan-create'),
     path('master/plan/update/<int:pk>/', views.UpdateMasterPlanView, name='master-plan-update'),
-    # path('responsible/delete/<int:pk>/', views.UpdateResponsibleView, name='responsible-delete'),
+    path('master/plan/delete/<int:pk>/', views.DeleteMasterPlanView, name='master-plan-delete'),
+    path('master/plan/details/<int:pk>/', views.MasterDetailView, name='master-details'),
 
     path('detail/', views.ListDetailView, name='detail'),
     path('detail/create/', views.CreateDetailView, name='detail-create'), 
     path('detail/update/<int:pk>/', views.UpdateDetailView, name='detail-update'),
-    # path('responsible/delete/<int:pk>/', views.UpdateResponsibleView, name='responsible-delete'),
+    path('detail/delete/<int:pk>/', views.DeleteDetailView, name='detail-delete'),
 ]
