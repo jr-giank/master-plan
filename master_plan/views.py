@@ -1,12 +1,26 @@
 from django.shortcuts import render, redirect
-from .forms import WorkAxeForm, ActivitieForm, ResponsibleForm, DateForm, MasterPlanForm, DetailForm
-from .models import Date, WorkAxe, Activitie, Responsible, MasterPlan, Detail
+from .forms import WorkAxeForm, ActivitieForm, ResponsibleForm, MasterPlanForm, DetailForm
+from .models import WorkAxe, Activitie, Responsible, MasterPlan, Detail
+import datetime
 
+# Main views
 def HomeView(request):
 
     records = MasterPlan.objects.values('id', 'name', 'date_created')
     
     return render(request=request, template_name='home.html', context={'records': records})
+
+def MasterDetailView(request, pk):
+
+    excluded_fields = ['master_plan']
+
+    master = MasterPlan.objects.get(id=pk)
+    master_names = MasterPlan._meta.fields
+
+    records = Detail.objects.filter(master_plan=master.id)
+    records_name = [field for field in Detail._meta.fields if field.name not in excluded_fields]
+    
+    return render(request=request, template_name='master-detail.html', context={'master':master, 'master-names':master_names, 'records':records, 'records_name':records_name})
 
 # WorkAxe Logic Views
 def ListWorkAxeView(request):
@@ -103,6 +117,17 @@ def UpdateActivityView(request, pk):
 
     return render(request=request, template_name='update.html', context={'form': form})
 
+def DeleteActivityView(request, pk):
+
+    record = Activitie.objects.get(id=pk)
+    
+    if request.POST:
+        record.delete()
+
+        return redirect('activity')
+
+    return render(request=request, template_name='delete.html')
+
 # Responsible Logic Views
 def ListResponsibleView(request):
 
@@ -143,6 +168,17 @@ def UpdateResponsibleView(request, pk):
         form = ResponsibleForm(initial={'name':responsible.name})
 
     return render(request=request, template_name='update.html', context={'form': form})
+
+def DeleteResponsibleView(request, pk):
+
+    record = Responsible.objects.get(id=pk)
+    
+    if request.POST:
+        record.delete()
+
+        return redirect('responsible')
+
+    return render(request=request, template_name='delete.html')
 
 # MasterPlan Logic Views
 def ListMasterPlanView(request):
@@ -193,6 +229,17 @@ def UpdateMasterPlanView(request, pk):
 
     return render(request=request, template_name='update.html', context={'form': form})
 
+def DeleteMasterPlanView(request, pk):
+
+    record = MasterPlan.objects.get(id=pk)
+    
+    if request.POST:
+        record.delete()
+
+        return redirect('master-plan')
+
+    return render(request=request, template_name='delete.html')
+
 # Detail Logic Views
 def ListDetailView(request):
 
@@ -211,6 +258,10 @@ def CreateDetailView(request):
             activity = Activitie.objects.get(id=request.POST['activity'])
             work_axe = WorkAxe.objects.get(id=activity.work_axe.id)
             responsible = Responsible.objects.get(id=request.POST['responsible'])
+            complete_date = request.POST['completed_date']
+            
+            if complete_date == '':
+                complete_date = None
             
             detail = Detail.objects.create(
                 master_plan=master_plan,
@@ -218,7 +269,7 @@ def CreateDetailView(request):
                 activity=activity,
                 responsible=responsible,
                 scheduled_date=request.POST['scheduled_date'],
-                completed_date=request.POST['completed_date'],
+                completed_date=complete_date,
                 evaluation = request.POST['evaluation'],
                 observations = request.POST['observations']
             )
@@ -241,28 +292,46 @@ def UpdateDetailView(request, pk):
             activity = Activitie.objects.get(id=request.POST['activity'])
             work_axe = WorkAxe.objects.get(id=activity.work_axe.id)
             responsible = Responsible.objects.get(id=request.POST['responsible'])
+            complete_date = request.POST['completed_date']
+            
+            if complete_date == '':
+                complete_date = None
 
             detail.master_plan=master_plan
             detail.work_axe=work_axe
             detail.activity=activity
             detail.responsible=responsible
             detail.scheduled_date = request.POST['scheduled_date']
-            detail.completed_date = request.POST['completed_date']
+            detail.completed_date = complete_date
             detail.evaluation = request.POST['evaluation']
             detail.observations = request.POST['observations']
             detail.save()
 
             return redirect('detail')
     else:
+        try:
+            complete_date = detail.completed_date.strftime('%Y-%m-%d'),
+        except AttributeError:
+            complete_date = datetime.datetime.now().strftime('%Y-%m-%d')
         form = DetailForm(initial={
             'master_plan':detail.master_plan,
             'work_axe':detail.work_axe,
             'activity':detail.activity,
             'responsible':detail.responsible,
-            'scheduled_date':detail.scheduled_date,
-            'completed_date':detail.completed_date,
+            'scheduled_date':detail.scheduled_date.strftime('%Y-%m-%d'),
             'evaluation':detail.evaluation,
             'observations':detail.observations
             })
 
     return render(request=request, template_name='update.html', context={'form': form})
+
+def DeleteDetailView(request, pk):
+
+    record = Detail.objects.get(id=pk)
+    
+    if request.POST:
+        record.delete()
+
+        return redirect('detail')
+
+    return render(request=request, template_name='delete.html')

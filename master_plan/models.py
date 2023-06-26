@@ -28,20 +28,6 @@ class Responsible(models.Model):
     def __str__(self):
         return self.name
 
-class Date(models.Model):
-
-    """ Date model for the task """
-        
-    activitie = models.ForeignKey(to=Activitie, null=True, blank=True, on_delete=models.SET_NULL)
-    date = models.DateField(null=False, blank=False)
-    responsible = models.ForeignKey(to=Responsible, null=True, blank=True, on_delete=models.SET_NULL)
-    date_made = models.DateField(null=True, blank=True)
-    evaluation = models.CharField(max_length=75, null=True, blank=True)
-    observations = models.TextField(null=True, blank=True)
-
-    def __str__(self):
-        return f"{self.activitie.work_axe} - {self.activitie} - {self.date}"
-
 class MasterPlan(models.Model):
 
     """ Master plan model for a project """
@@ -63,7 +49,7 @@ class Detail(models.Model):
     activity = models.ForeignKey(to=Activitie, null=True, blank=True, on_delete=models.SET_NULL, verbose_name='Actividad')
     responsible = models.ForeignKey(to=Responsible, null=True, blank=True, on_delete=models.SET_NULL, verbose_name='Responsable')
     scheduled_date = models.DateField(null=False, blank=False, verbose_name='Fecha programada')
-    completed_date = models.DateField(null=False, blank=False, verbose_name='Fecha completada')
+    completed_date = models.DateField(null=True, blank=True, verbose_name='Fecha completada')
     evaluation = models.TextField(null=True, blank=True, verbose_name='Evaluación')
     observations = models.TextField(null=False, blank=False, verbose_name='Observaciones')
 
