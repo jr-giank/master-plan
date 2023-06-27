@@ -1,7 +1,8 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, resolve_url
 from .forms import WorkAxeForm, ActivitieForm, ResponsibleForm, MasterPlanForm, DetailForm
 from .models import WorkAxe, Activitie, Responsible, MasterPlan, Detail
 import datetime
+import re
 
 # Main views
 def HomeView(request):
@@ -277,6 +278,47 @@ def CreateDetailView(request):
             return redirect('detail')
     else:
         form = DetailForm()
+
+    return render(request=request, template_name='create.html', context={'form': form})
+
+def CreateMasterDetailView(request, pk):
+
+    master = MasterPlan.objects.get(id=pk)
+
+    if request.method == 'POST':
+        form = DetailForm(request.POST)
+
+        if form.is_valid():
+            master_plan = MasterPlan.objects.get(id=request.POST['master_plan'])
+            activity = Activitie.objects.get(id=request.POST['activity'])
+            work_axe = WorkAxe.objects.get(id=activity.work_axe.id)
+            responsible = Responsible.objects.get(id=request.POST['responsible'])
+            complete_date = request.POST['completed_date']
+            
+            if complete_date == '':
+                complete_date = None
+            
+            detail = Detail.objects.create(
+                master_plan=master_plan,
+                work_axe=work_axe,
+                activity=activity,
+                responsible=responsible,
+                scheduled_date=request.POST['scheduled_date'],
+                completed_date=complete_date,
+                evaluation = request.POST['evaluation'],
+                observations = request.POST['observations']
+            )
+            url_actual = request.build_absolute_uri()
+
+            nueva_url = re.sub(f'/detail/create/{pk}/', '', url_actual)
+            
+            nueva_url += f'/master/plan/details/{pk}/'
+
+            return redirect(nueva_url)
+    else:
+        form = DetailForm(initial={
+            'master_plan':master.id
+        })
 
     return render(request=request, template_name='create.html', context={'form': form})
 

@@ -44,6 +44,7 @@ urlpatterns = [
 
     path('detail/', views.ListDetailView, name='detail'),
     path('detail/create/', views.CreateDetailView, name='detail-create'), 
+    path('detail/create/<int:pk>/', views.CreateMasterDetailView, name='master-detail-create'), 
     path('detail/update/<int:pk>/', views.UpdateDetailView, name='detail-update'),
     path('detail/delete/<int:pk>/', views.DeleteDetailView, name='detail-delete'),
 ]

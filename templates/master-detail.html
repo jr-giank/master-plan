@@ -9,7 +9,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
-    <title>Plan Maestro</title>
+
+        <title>Plan Maestro</title>
     <style>
         .container-fluid,
         .container-fluid ul {
@@ -19,13 +20,17 @@
         .dropdown-item:hover {
             background-color: #5f86ad;
         }
+
+        .btn:hover{
+            transform: scale(1.05);
+        }
     </style>
 </head>
 
 <body>
     {% include 'nav.html' %}
 
-    <div class="container">
+    <div class="container" id="container-data">
         <div class="row">
             <div class="col-md-4">
                 <strong>Master plan:</strong>
@@ -40,23 +45,35 @@
                 <p>{{ master.description }}</p>
             </div>
         </div>
+        <div class="row">
+            <div class="col text-end">
+                <strong>Operaciones:</strong>
+                <a href="{% url 'master-detail-create' master.id %}" class="page-link border-0 bg-info text-white d-inline-block py-1 px-2 btn">Agregar</a></button>
+                <a class="page-link border-0 bg-secondary text-white d-inline-block py-1 px-2 btn" onclick="exportTableToExcel()">Imprimir</a></button>
+            </div>
+        </div>
     </div>
 
-    <table class="table">
+    <table class="table" id="tabla">
         <thead>
             <tr>
                 {% for field in records_name %}
-                <th scope="col" class="text-center fs-5">{{ field.verbose_name }}</th>
+                    <th scope="col" class="text-center fs-5">{{ field.verbose_name }}</th>
                 {% endfor %}
+                <th scope="col" class="text-center fs-5">Acciones</th>
             </tr>
         </thead>
         <tbody>
             {% for record in records %}
-            <tr>
-                {% for field in records_name %}
-                <td scope="col" class="text-center">{{ record|getattr_filter:field.name }}</td>
-                {% endfor %}
-            </tr>
+                <tr>
+                    {% for field in records_name %}
+                        <td scope="col" class="text-center">{{ record|getattr_filter:field.name }}</td>
+                    {% endfor %}
+                    <td class="col text-center">
+                        <a href='{{ request.scheme }}://{{ request.META.HTTP_HOST }}/detail/update/{{record.pk}}/' class="page-link border-0 bg-success text-white d-inline-block p-1 mx-2 mb-1 btn">Modificar</a>
+                        <a href='{{ request.scheme }}://{{ request.META.HTTP_HOST }}/detail/delete/{{record.pk}}/' class="page-link border-0 bg-danger text-white d-inline-block p-1 mx-2 mb-1 btn">Eliminar</a>
+                    </td>
+                </tr>
             {% endfor %}
         </tbody>
     </table>
@@ -67,6 +84,50 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    
+    <script src="https://unpkg.com/exceljs/dist/exceljs.min.js"></script>
+    <script>
+        async function exportTableToExcel() {
+            // Tabla HTML
+            var tablaHTML = document.getElementById('tabla'); // Reemplaza 'miTabla' con el ID de tu tabla
+            
+            var excel = new ExcelJS.Workbook();
+            var hoja = excel.addWorksheet('Master Data');
+
+            // Titulo de las columnas
+            var filasHTML = tablaHTML.getElementsByTagName('tr');
+            for (var i = 0; i < filasHTML.length; i++) {
+                var celdasHTML = filasHTML[i].getElementsByTagName('th');
+
+                for (var j = 0; j < celdasHTML.length; j++) {
+                    var valorCelda = celdasHTML[j].innerText;
+
+                    hoja.getCell(String.fromCharCode(65 + j) + (i + 1)).value = valorCelda;             
+                }
+            }
+            // Valores de las columnas
+            
+            var filasHTML = tablaHTML.getElementsByTagName('tr');
+            for (var i = 0; i < filasHTML.length; i++) {
+                var celdasHTML = filasHTML[i].getElementsByTagName('td');
+
+                for (var j = 0; j < celdasHTML.length; j++) {
+                var valorCelda = celdasHTML[j].innerText;
+
+                hoja.getCell(String.fromCharCode(65 + j) + (i + 1)).value = valorCelda;
+                }
+            }
+
+            var buffer = await excel.xlsx.writeBuffer();
+            var blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+            var url = window.URL.createObjectURL(blob);
+            var link = document.createElement('a');
+            link.href = url;
+            link.download = 'Plan-Maestro.xlsx';
+            link.click();
+            window.URL.revokeObjectURL(url);
+        }
+    </script>
 
 </body>
 
