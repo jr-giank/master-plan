@@ -48,7 +48,9 @@
         <div class="row">
             <div class="col text-end">
                 <strong>Operaciones:</strong>
-                <a href="{% url 'master-detail-create' master.id %}" class="page-link border-0 bg-info text-white d-inline-block py-1 px-2 btn">Agregar</a></button>
+                {% if request.user.role == 'A' %}
+                    <a href="{% url 'master-detail-create' master.id %}" class="page-link border-0 bg-info text-white d-inline-block py-1 px-2 btn">Agregar</a></button>
+                {% endif %}
                 <a class="page-link border-0 bg-secondary text-white d-inline-block py-1 px-2 btn" onclick="exportTableToExcel()">Imprimir</a></button>
             </div>
         </div>
@@ -60,7 +62,9 @@
                 {% for field in records_name %}
                     <th scope="col" class="text-center fs-5">{{ field.verbose_name }}</th>
                 {% endfor %}
-                <th scope="col" class="text-center fs-5">Acciones</th>
+                {% if request.user.role == 'A' %}
+                    <th scope="col" class="text-center fs-5">Acciones</th>
+                {% endif %}
             </tr>
         </thead>
         <tbody>
@@ -69,10 +73,12 @@
                     {% for field in records_name %}
                         <td scope="col" class="text-center">{{ record|getattr_filter:field.name }}</td>
                     {% endfor %}
-                    <td class="col text-center">
-                        <a href='{{ request.scheme }}://{{ request.META.HTTP_HOST }}/detail/update/{{record.pk}}/' class="page-link border-0 bg-success text-white d-inline-block p-1 mx-2 mb-1 btn">Modificar</a>
-                        <a href='{{ request.scheme }}://{{ request.META.HTTP_HOST }}/detail/delete/{{record.pk}}/' class="page-link border-0 bg-danger text-white d-inline-block p-1 mx-2 mb-1 btn">Eliminar</a>
-                    </td>
+                    {% if request.user.role == 'A' %}
+                        <td class="col text-center">
+                            <a href='{{ request.scheme }}://{{ request.META.HTTP_HOST }}/detail/update/{{record.pk}}/' class="page-link border-0 bg-success text-white d-inline-block p-1 mx-2 mb-1 btn">Modificar</a>
+                            <a href='{{ request.scheme }}://{{ request.META.HTTP_HOST }}/detail/delete/{{record.pk}}/' class="page-link border-0 bg-danger text-white d-inline-block p-1 mx-2 mb-1 btn">Eliminar</a>
+                        </td>
+                    {% endif %}
                 </tr>
             {% endfor %}
         </tbody>

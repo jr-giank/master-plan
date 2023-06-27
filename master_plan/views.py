@@ -1,28 +1,87 @@
 from django.shortcuts import render, redirect, resolve_url
-from .forms import WorkAxeForm, ActivitieForm, ResponsibleForm, MasterPlanForm, DetailForm
-from .models import WorkAxe, Activitie, Responsible, MasterPlan, Detail
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.hashers import make_password
+from django.contrib.auth.decorators import login_required
+
+from .forms import SignUpForm, SignUpUpdateForm, LoginForm, WorkAxeForm, ActivitieForm, ResponsibleForm, MasterPlanForm, DetailForm
+from .models import CustomUser, WorkAxe, Activitie, Responsible, MasterPlan, Detail, master_plan_status
+
+from .functions import is_admin 
 import datetime
 import re
 
-# Main views
-def HomeView(request):
-
-    records = MasterPlan.objects.values('id', 'name', 'date_created')
+# Authentication
+def SignUpView(request):
     
-    return render(request=request, template_name='home.html', context={'records': records})
+    if request.method == 'POST':
+        form = SignUpForm(request.POST)
 
+        password = request.POST['password']
+        password_confirmation = request.POST['password_confirmation']
+
+        if form.is_valid():
+            if password != password_confirmation:
+                form.add_error('password', 'Las contraseñas no coinciden.')
+                
+                return render(request=request, template_name='create.html', context={'form': form})
+
+            user = CustomUser.objects.create()
+            user.first_name = request.POST['first_name']
+            user.last_name = request.POST['last_name']
+            user.email = request.POST['email']
+            user.password = make_password(password)
+            user.save()
+
+            return redirect('master-plan')
+    else:
+        form = SignUpForm()
+
+    return render(request=request, template_name='create.html', context={'form': form})
+
+def LoginView(request):
+    
+    if request.method == 'POST':
+        form = LoginForm(request.POST)
+        
+        if form.is_valid():
+            
+            email = form.cleaned_data['email']
+            password = form.cleaned_data['password']
+            user = authenticate(request, username=email, password=password)
+            
+            if user is not None:
+                login(request, user)
+                return redirect('master-plan')
+            else:
+                form.add_error('password', 'Credenciales inválidas')
+    else:
+        form = LoginForm()
+
+    return render(request, 'login.html', {'form': form})
+
+def LogoutView(request):
+    logout(request)
+
+    return redirect('login')
+
+# Main views
+@login_required
 def MasterDetailView(request, pk):
-
     excluded_fields = ['master_plan']
 
     master = MasterPlan.objects.get(id=pk)
     master_names = MasterPlan._meta.fields
 
-    records = Detail.objects.filter(master_plan=master.id)
     records_name = [field for field in Detail._meta.fields if field.name not in excluded_fields]
+    
+    if is_admin(request.user) == True:
+        records = Detail.objects.filter(master_plan=master.id)
+    else:
+        records = Detail.objects.filter(master_plan=master.id, responsible=request.user.id)
     
     return render(request=request, template_name='master-detail.html', context={'master':master, 'master-names':master_names, 'records':records, 'records_name':records_name})
 
+@login_required
 # WorkAxe Logic Views
 def ListWorkAxeView(request):
 
@@ -31,6 +90,7 @@ def ListWorkAxeView(request):
 
     return render(request=request, template_name='list.html', context={'records': records, 'records_name': records_name})
 
+@login_required
 def CreateWorkAxeView(request):
 
     if request.method == 'POST':
@@ -47,6 +107,7 @@ def CreateWorkAxeView(request):
 
     return render(request=request, template_name='create.html', context={'form': form})
 
+@login_required
 def UpdateWorkAxeView(request, pk):
 
     work_axe = WorkAxe.objects.get(id=pk)
@@ -64,6 +125,7 @@ def UpdateWorkAxeView(request, pk):
 
     return render(request=request, template_name='update.html', context={'form': form})
 
+@login_required
 def DeleteWorkAxeView(request, pk):
 
     record = WorkAxe.objects.get(id=pk)
@@ -76,6 +138,7 @@ def DeleteWorkAxeView(request, pk):
     return render(request=request, template_name='delete.html')
 
 # Activity Logic Views
+@login_required
 def ListActivityView(request):
 
     records = Activitie.objects.all()
@@ -83,6 +146,7 @@ def ListActivityView(request):
 
     return render(request=request, template_name='list.html', context={'records': records, 'records_name': records_name})
 
+@login_required
 def CreateActivityView(request):
 
     if request.method == 'POST':
@@ -98,6 +162,7 @@ def CreateActivityView(request):
 
     return render(request=request, template_name='create.html', context={'form': form})
 
+@login_required
 def UpdateActivityView(request, pk):
 
     activity = Activitie.objects.get(id=pk)
@@ -118,6 +183,7 @@ def UpdateActivityView(request, pk):
 
     return render(request=request, template_name='update.html', context={'form': form})
 
+@login_required
 def DeleteActivityView(request, pk):
 
     record = Activitie.objects.get(id=pk)
@@ -130,49 +196,87 @@ def DeleteActivityView(request, pk):
     return render(request=request, template_name='delete.html')
 
 # Responsible Logic Views
+@login_required
 def ListResponsibleView(request):
 
-    records = Responsible.objects.all()
-    records_name =Responsible._meta.fields
+    records = CustomUser.objects.all()
+    records_name = CustomUser._meta.fields
+
+    excluded_fields = ['is_staff', 'is_active', 'is_superuser', 'date_joined', 'last_login', 'password', 'username', 'role']
+
+    records = CustomUser.objects.all()
+    records_name = [field for field in CustomUser._meta.fields if field.name not in excluded_fields]
 
     return render(request=request, template_name='list.html', context={'records': records, 'records_name': records_name})
 
+@login_required
 def CreateResponsibleView(request):
 
     if request.method == 'POST':
-        form = ResponsibleForm(request.POST)
+        form = SignUpForm(request.POST)
+    
+        password = request.POST['password']
+        password_confirmation = request.POST['password_confirmation']
 
         if form.is_valid():
-            responsible = Responsible.objects.create()
-            responsible.name = request.POST['name']
+            if password != password_confirmation:
+                form.add_error('password', 'Las contraseñas no coinciden.')
+                
+                return render(request=request, template_name='create.html', context={'form': form})
+
+            responsible = CustomUser.objects.create()
+            responsible.first_name = request.POST['first_name']
+            responsible.last_name = request.POST['last_name']
+            responsible.email = request.POST['email']
+            responsible.role = 'B'
+            responsible.password = make_password(password)
             responsible.save()
 
             return redirect('responsible')
     else:
-        form = ResponsibleForm()
+        form = SignUpForm()
 
     return render(request=request, template_name='create.html', context={'form': form})
 
+@login_required
 def UpdateResponsibleView(request, pk):
 
-    responsible = Responsible.objects.get(id=pk)
+    responsible = CustomUser.objects.get(id=pk)
     
     if request.method == 'POST':
-        form = ResponsibleForm(request.POST)
+        form = SignUpUpdateForm(request.POST)
+
+        password = request.POST['password']
+        password_confirmation = request.POST['password_confirmation']
 
         if form.is_valid():
-            responsible.name = request.POST['name']
+            if password_confirmation != None and password != None and password != password_confirmation:
+                form.add_error('password', 'Las contraseñas no coinciden.')
+                
+                return render(request=request, template_name='create.html', context={'form': form})
+
+            if password != None:
+                responsible.password = make_password(password)
+
+            responsible.first_name = request.POST['first_name']
+            responsible.last_name = request.POST['last_name']
+            responsible.email = request.POST['email']
             responsible.save()
 
             return redirect('responsible')
     else:
-        form = ResponsibleForm(initial={'name':responsible.name})
+        form = SignUpUpdateForm(initial={
+            'first_name':responsible.first_name,
+            'last_name': responsible.last_name,
+            'email': responsible.email,
+            })
 
     return render(request=request, template_name='update.html', context={'form': form})
 
+@login_required
 def DeleteResponsibleView(request, pk):
 
-    record = Responsible.objects.get(id=pk)
+    record = CustomUser.objects.get(id=pk)
     
     if request.POST:
         record.delete()
@@ -182,13 +286,18 @@ def DeleteResponsibleView(request, pk):
     return render(request=request, template_name='delete.html')
 
 # MasterPlan Logic Views
+@login_required
 def ListMasterPlanView(request):
 
     records = MasterPlan.objects.all()
     records_name = MasterPlan._meta.fields
 
+    for instance in records:
+        instance.status = dict(master_plan_status)[instance.status]
+
     return render(request=request, template_name='list.html', context={'records': records, 'records_name': records_name})
 
+@login_required
 def CreateMasterPlanView(request):
 
     if request.method == 'POST':
@@ -207,6 +316,7 @@ def CreateMasterPlanView(request):
 
     return render(request=request, template_name='create.html', context={'form': form})
 
+@login_required
 def UpdateMasterPlanView(request, pk):
 
     master_plan = MasterPlan.objects.get(id=pk)
@@ -217,6 +327,7 @@ def UpdateMasterPlanView(request, pk):
         if form.is_valid():
             master_plan.name = request.POST['name']
             master_plan.description = request.POST['description']
+            master_plan.status = request.POST['status']
             master_plan.notes = request.POST['notes']
             master_plan.save()
 
@@ -225,11 +336,13 @@ def UpdateMasterPlanView(request, pk):
         form = MasterPlanForm(initial={
             'name':master_plan.name,
             'description':master_plan.description,
+            'status':master_plan.status,
             'notes':master_plan.notes
             })
 
     return render(request=request, template_name='update.html', context={'form': form})
 
+@login_required
 def DeleteMasterPlanView(request, pk):
 
     record = MasterPlan.objects.get(id=pk)
@@ -242,6 +355,7 @@ def DeleteMasterPlanView(request, pk):
     return render(request=request, template_name='delete.html')
 
 # Detail Logic Views
+@login_required
 def ListDetailView(request):
 
     records = Detail.objects.all()
@@ -249,6 +363,7 @@ def ListDetailView(request):
 
     return render(request=request, template_name='list.html', context={'records': records, 'records_name': records_name})
 
+@login_required
 def CreateDetailView(request):
 
     if request.method == 'POST':
@@ -258,7 +373,7 @@ def CreateDetailView(request):
             master_plan = MasterPlan.objects.get(id=request.POST['master_plan'])
             activity = Activitie.objects.get(id=request.POST['activity'])
             work_axe = WorkAxe.objects.get(id=activity.work_axe.id)
-            responsible = Responsible.objects.get(id=request.POST['responsible'])
+            responsible = CustomUser.objects.get(id=request.POST['responsible'])
             complete_date = request.POST['completed_date']
             
             if complete_date == '':
@@ -281,6 +396,7 @@ def CreateDetailView(request):
 
     return render(request=request, template_name='create.html', context={'form': form})
 
+@login_required
 def CreateMasterDetailView(request, pk):
 
     master = MasterPlan.objects.get(id=pk)
@@ -292,7 +408,7 @@ def CreateMasterDetailView(request, pk):
             master_plan = MasterPlan.objects.get(id=request.POST['master_plan'])
             activity = Activitie.objects.get(id=request.POST['activity'])
             work_axe = WorkAxe.objects.get(id=activity.work_axe.id)
-            responsible = Responsible.objects.get(id=request.POST['responsible'])
+            responsible = CustomUser.objects.get(id=request.POST['responsible'])
             complete_date = request.POST['completed_date']
             
             if complete_date == '':
@@ -322,6 +438,7 @@ def CreateMasterDetailView(request, pk):
 
     return render(request=request, template_name='create.html', context={'form': form})
 
+@login_required
 def UpdateDetailView(request, pk):
 
     detail = Detail.objects.get(id=pk)
@@ -333,7 +450,7 @@ def UpdateDetailView(request, pk):
             master_plan = MasterPlan.objects.get(id=request.POST['master_plan'])
             activity = Activitie.objects.get(id=request.POST['activity'])
             work_axe = WorkAxe.objects.get(id=activity.work_axe.id)
-            responsible = Responsible.objects.get(id=request.POST['responsible'])
+            responsible = CustomUser.objects.get(id=request.POST['responsible'])
             complete_date = request.POST['completed_date']
             
             if complete_date == '':
@@ -367,6 +484,7 @@ def UpdateDetailView(request, pk):
 
     return render(request=request, template_name='update.html', context={'form': form})
 
+@login_required
 def DeleteDetailView(request, pk):
 
     record = Detail.objects.get(id=pk)
