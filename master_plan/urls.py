@@ -20,6 +20,9 @@ from . import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('sign/up/', views.SignUpView, name='sign-up'),
+    path('login/', views.LoginView, name='login'),
+    path('logout/', views.LogoutView, name='log-out'),
 
     path('work/axe/', views.ListWorkAxeView, name='work-axe'),
     path('work/axe/create/', views.CreateWorkAxeView, name='work-axe-create'),

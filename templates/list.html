@@ -33,7 +33,7 @@
     <thead>
       <tr>
         {% for field in records_name %}
-        <th scope="col" class="text-center fs-5">{{ field.verbose_name }}</th>
+          <th scope="col" class="text-center fs-5">{{ field.verbose_name }}</th>
         {% endfor %}
         <th scope="col" class="text-center fs-5">Acciones</th>
       </tr>
@@ -47,8 +47,10 @@
         <td class="col text-center">
           {% if request.path == '/' %}
             <a href='{{ request.build_absolute_uri }}master/plan/details/{{record.id}}/' class="page-link border-0 bg-warning text-white d-inline-block py-1 px-2 mx-2 mb-1 btn">Ver</a></button>
-            <a href='{{ request.build_absolute_uri }}master/plan/update/{{record.pk}}/' class="page-link border-0 bg-success text-white d-inline-block p-1 mx-2 mb-1 btn">Modificar</a>
-            <a href='{{ request.build_absolute_uri }}master/plan/delete/{{record.pk}}/' class="page-link border-0 bg-danger text-white d-inline-block p-1 mx-2 mb-1 btn">Eliminar</a>
+            {% if request.user.role == 'A' %}
+              <a href='{{ request.build_absolute_uri }}master/plan/update/{{record.pk}}/' class="page-link border-0 bg-success text-white d-inline-block p-1 mx-2 mb-1 btn">Modificar</a>
+              <a href='{{ request.build_absolute_uri }}master/plan/delete/{{record.pk}}/' class="page-link border-0 bg-danger text-white d-inline-block p-1 mx-2 mb-1 btn">Eliminar</a>
+            {% endif %}
           {% else %}
             <a href='{{ request.build_absolute_uri }}update/{{record.pk}}/' class="page-link border-0 bg-success text-white d-inline-block p-1 mx-2 mb-1 btn">Modificar</a>
             <a href='{{ request.build_absolute_uri }}delete/{{record.pk}}/' class="page-link border-0 bg-danger text-white d-inline-block p-1 mx-2 mb-1 btn">Eliminar</a>

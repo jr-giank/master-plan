@@ -157,6 +157,28 @@
                         {% for error in field.errors %}
                             <p class="text-danger">{{ error }}</p>
                         {% endfor %}
+                    {% elif field.field.widget.input_type == 'email'%}
+                        <label for="{{ field.name }}">{{ field.label_tag }}</label>
+                        <input
+                            type="email"
+                            value="{{ field.value|default_if_none:'' }}"
+                            name="{{ field.name }}"
+                        />
+                        
+                        {% for error in field.errors %}
+                            <p class="text-danger">{{ error }}</p>
+                        {% endfor %}
+                    {% elif field.field.widget.input_type == 'password'%}
+                        <label for="{{ field.name }}">{{ field.label_tag }}</label>
+                        <input
+                            type="password"
+                            value="{{ field.value|default_if_none:'' }}"
+                            name="{{ field.name }}"
+                        />
+                        
+                        {% for error in field.errors %}
+                            <p class="text-danger">{{ error }}</p>
+                        {% endfor %}
                     {% elif field.field.widget.input_type != 'text' and field.field.widget.input_type != 'select'%}
                         <label for="{{ field.name }}">{{ field.label_tag }}</label>
                         <textarea 

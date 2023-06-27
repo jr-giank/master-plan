@@ -1,6 +1,95 @@
 from django import forms
 from django.forms.widgets import DateInput
-from .models import WorkAxe, Activitie, Responsible, MasterPlan
+from .models import CustomUser, WorkAxe, Activitie, Responsible, MasterPlan, master_plan_status
+
+class SignUpForm(forms.Form):
+    
+    first_name = forms.CharField(
+        label=('Nombre'),
+        error_messages={
+            'required': 'Este campo es requerido.',
+            'invalid': 'El valor ingresado es inválido.',
+        })
+    last_name = forms.CharField(
+        label=('Apellido'),
+        error_messages={
+            'required': 'Este campo es requerido.',
+            'invalid': 'El valor ingresado es inválido.',
+        })
+    email = forms.EmailField(
+        label=('Correo'),
+        error_messages={
+            'required': 'Este campo es requerido.',
+            'invalid': 'El valor ingresado es inválido.',
+            'unique': 'El email ya esta asignado a otro usuario.'
+        })
+    password = forms.CharField(
+        label=('Contraseña'),
+        widget=forms.PasswordInput(),
+        error_messages={
+            'required': 'Este campo es requerido.',
+            'invalid': 'El valor ingresado es inválido.',
+        })
+    password_confirmation = forms.CharField(
+        label=('Confirmar contraseña'),
+        widget=forms.PasswordInput(),
+        error_messages={
+            'required': 'Este campo es requerido.',
+            'invalid': 'El valor ingresado es inválido.',
+        })
+
+class SignUpUpdateForm(forms.Form):
+
+    first_name = forms.CharField(
+        label=('Nombre'),
+        error_messages={
+            'required': 'Este campo es requerido.',
+            'invalid': 'El valor ingresado es inválido.',
+        })
+    last_name = forms.CharField(
+        label=('Apellido'),
+        error_messages={
+            'required': 'Este campo es requerido.',
+            'invalid': 'El valor ingresado es inválido.',
+        })
+    email = forms.EmailField(
+        label=('Correo'),
+        error_messages={
+            'required': 'Este campo es requerido.',
+            'invalid': 'El valor ingresado es inválido.',
+            'unique': 'El email ya esta asignado a otro usuario.'
+        })
+    password = forms.CharField(
+        label=('Contraseña'),
+        widget=forms.PasswordInput(),
+        required=False,
+        error_messages={
+            'invalid': 'El valor ingresado es inválido.',
+        })
+    password_confirmation = forms.CharField(
+        label=('Confirmar contraseña'),
+        widget=forms.PasswordInput(),
+        required=False,
+        error_messages={
+            'invalid': 'El valor ingresado es inválido.',
+        })
+
+class LoginForm(forms.Form):
+
+    email = forms.EmailField(
+        label=('Correo'),
+        error_messages={
+            'required': 'Este campo es requerido.',
+            'invalid': 'El valor ingresado es inválido.',
+            'unique': 'El email ya esta asignado a otro usuario.'
+        })
+    password = forms.CharField(
+        label=('Contraseña'),
+        widget=forms.PasswordInput(),
+        error_messages={
+            'required': 'Este campo es requerido.',
+            'invalid': 'El valor ingresado es inválido.',
+        })
 
 class WorkAxeForm(forms.Form):
     name = forms.CharField(
@@ -49,6 +138,13 @@ class MasterPlanForm(forms.Form):
             'required': 'Este campo es requerido.',
             'invalid': 'El valor ingresado es inválido.',
         })
+    status = forms.ChoiceField(
+        label='Estado', 
+        choices=master_plan_status,
+        error_messages={
+            'required': 'Este campo es requerido.',
+            'invalid': 'El valor ingresado es inválido.',
+        })
     notes = forms.CharField(
         label='Notas', 
         widget=forms.Textarea, 
@@ -75,7 +171,7 @@ class DetailForm(forms.Form):
         })
     responsible = forms.ModelChoiceField(
         label=('Responsable'), 
-        queryset=Responsible.objects.all(),
+        queryset=CustomUser.objects.all(),
         error_messages={
             'required': 'Este campo es requerido.',
             'invalid': 'El valor ingresado es inválido.',

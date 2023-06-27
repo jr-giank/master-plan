@@ -1,54 +1,63 @@
 <nav class="navbar navbar-expand-lg bg-body-tertiary p-0">
     <div class="container-fluid">
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0 w-100">
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle text-white" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                         Plan Maestro
                     </a>
                     <ul class="dropdown-menu">
                         <li><a class="dropdown-item text-white" href="{% url 'master-plan' %}">Listar Planes Maestros</a></li>
-                        <li><a class="dropdown-item text-white" href="{% url 'master-plan-create' %}">Crear Plan Maestro</a></li>
+                        {% if request.user.role == 'A' %}    
+                            <li><a class="dropdown-item text-white" href="{% url 'master-plan-create' %}">Crear Plan Maestro</a></li>
+                        {% endif %}
                     </ul>
                 </li>
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle text-white" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        Eje de trabajo
+                {% if request.user.role == 'A' %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle text-white" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Eje de trabajo
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item text-white" href="{% url 'work-axe' %}">Listar Ejes</a></li>
+                            <li><a class="dropdown-item text-white" href="{% url 'work-axe-create' %}">Crear Eje</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle text-white" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Actividades
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item text-white" href="{% url 'activity' %}">Listar Actividades</a></li>
+                            <li><a class="dropdown-item text-white" href="{% url 'activity-create' %}">Crear Actividad</a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle text-white" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Responsables
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item text-white" href="{% url 'responsible' %}">Listar Responsables</a>
+                            </li>
+                            <li><a class="dropdown-item text-white" href="{% url 'responsible-create' %}">Crear Responsable</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle text-white" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Detalles
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item text-white" href="{% url 'detail' %}">Listar Detalles</a>
+                            </li>
+                            <li><a class="dropdown-item text-white" href="{% url 'detail-create' %}">Crear Detalle</a></li>
+                        </ul>
+                    </li>
+                {% endif %}
+                <li class="nav-item justify-end ms-auto">
+                    <a href="{% url 'log-out' %}" class="nav-link text-white" role="button" aria-expanded="false">
+                        Cerrar sesión
                     </a>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item text-white" href="{% url 'work-axe' %}">Listar Ejes</a></li>
-                        <li><a class="dropdown-item text-white" href="{% url 'work-axe-create' %}">Crear Eje</a></li>
-                    </ul>
-                </li>
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle text-white" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        Actividades
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item text-white" href="{% url 'activity' %}">Listar Actividades</a></li>
-                        <li><a class="dropdown-item text-white" href="{% url 'activity-create' %}">Crear Actividad</a>
-                        </li>
-                    </ul>
-                </li>
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle text-white" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        Responsables
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item text-white" href="{% url 'responsible' %}">Listar Responsables</a>
-                        </li>
-                        <li><a class="dropdown-item text-white" href="{% url 'responsible-create' %}">Crear Responsable</a></li>
-                    </ul>
-                </li>
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle text-white" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        Detalles
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item text-white" href="{% url 'detail' %}">Listar Detalles</a>
-                        </li>
-                        <li><a class="dropdown-item text-white" href="{% url 'detail-create' %}">Crear Detalle</a></li>
-                    </ul>
                 </li>
             </ul>
         </div>
