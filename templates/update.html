@@ -112,7 +112,7 @@
     </style>
 </head>
 <body>
-    <div>
+    <div class="mb-5">
         <form method="post">
             {% csrf_token %}
 
@@ -133,7 +133,7 @@
                         </select>
 
                         {% for error in field.errors %}
-                            <p class="text-danger">{{ error }}</p>
+                            <p class="text-danger mt-3">{{ error }}</p>
                         {% endfor %}
                     {% elif field.field.widget.input_type == 'text' %}
                         <label for="{{ field.name }}">{{ field.label_tag }}</label>
@@ -144,7 +144,7 @@
                         />
 
                         {% for error in field.errors %}
-                            <p class="text-danger">{{ error }}</p>
+                            <p class="text-danger mt-3">{{ error }}</p>
                         {% endfor %}
                     {% elif field.field.widget.input_type == 'date'%}
                         <label for="{{ field.name }}">{{ field.label_tag }}</label>
@@ -155,7 +155,7 @@
                         />
 
                         {% for error in field.errors %}
-                            <p class="text-danger">{{ error }}</p>
+                            <p class="text-danger mt-3">{{ error }}</p>
                         {% endfor %}
                     {% elif field.field.widget.input_type == 'email'%}
                         <label for="{{ field.name }}">{{ field.label_tag }}</label>
@@ -166,7 +166,7 @@
                         />
                         
                         {% for error in field.errors %}
-                            <p class="text-danger">{{ error }}</p>
+                            <p class="text-danger mt-3">{{ error }}</p>
                         {% endfor %}
                     {% elif field.field.widget.input_type == 'password'%}
                         <label for="{{ field.name }}">{{ field.label_tag }}</label>
@@ -177,7 +177,7 @@
                         />
                         
                         {% for error in field.errors %}
-                            <p class="text-danger">{{ error }}</p>
+                            <p class="text-danger mt-3">{{ error }}</p>
                         {% endfor %}
                     {% elif field.field.widget.input_type != 'text' and field.field.widget.input_type != 'select'%}
                         <label for="{{ field.name }}">{{ field.label_tag }}</label>
@@ -188,14 +188,14 @@
                             style="text-align: left;">{{ field.value }}</textarea>
                         
                         {% for error in field.errors %}
-                            <p class="text-danger">{{ error }}</p>
+                            <p class="text-danger mt-3">{{ error }}</p>
                         {% endfor %}
                     {% endif %}
                 </div>
             {% endfor %}
 
             <button type="submit">Enviar</button>
-            <a href="javascript:history.back()" class="btn btn-outline-danger cancel">Cancelar</a>
+            <a href="{{ previous_url }}" class="btn btn-outline-danger cancel">Cancelar</a>
         </form>
     </div>
 

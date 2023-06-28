@@ -12,6 +12,10 @@
 
         <title>Plan Maestro</title>
     <style>
+        #bg-complete {
+            background: #52b788; /* Color de fondo personalizado */
+        }
+
         .container-fluid,
         .container-fluid ul {
             background-color: #306191;
@@ -55,76 +59,82 @@
             </div>
         </div>
         <div class="row">
-            <form method="post" class="row">
+            <form method="post">
                 {% csrf_token %}
-
-                {% for field in form %}
-                    <div class="col mt-3">
-                        {% if field.field.widget.input_type == 'select' %}
-                            <label for="{{ field.name }}">{{ field.label_tag }}</label>
-                            <select name="{{ field.name }}">
-                                {% for choice in field.field.choices %}
-                                    {% if field.value == choice.0 %}
-                                        <option value="{{ choice.0 }}" selected>{{ choice.1 }}</option>
+                
+                <div class="row">
+                    {% for field in form %}
+                        <div class="col-auto mt-3">
+                            {% if request.user.role == 'B' and field.name == 'responsible' %}
+                            {% else %}
+                                <strong for="{{ field.name }}">{{ field.label_tag }}</strong>
+                            {% endif %}
+                            <div class="col">
+                                {% if field.field.widget.input_type == 'select' %}
+                                    {% if request.user.role == 'B' and field.name == 'responsible' %}
                                     {% else %}
-                                        <option value="{{ choice.0 }}">{{ choice.1 }}</option>
-                                    {% endif %}
-                                {% endfor %}
-                            </select>
+                                        <select name="{{ field.name }}">
+                                            {% for choice in field.field.choices %}
+                                                {% if field.value == choice.0 %}
+                                                    <option value="{{ choice.0 }}" selected>{{ choice.1 }}</option>
+                                                {% else %}
+                                                    <option value="{{ choice.0 }}">{{ choice.1 }}</option>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </select>
 
-                            {% for error in field.errors %}
-                                <p class="text-danger">{{ error }}</p>
-                            {% endfor %}
-                        {% elif field.field.widget.input_type == 'text' %}
-                            <label for="{{ field.name }}">{{ field.label_tag }}</label>
-                            <input
-                                type="text"
-                                value="{{ field.value|default_if_none:'' }}"
-                                name="{{ field.name }}"
-                            />
-                            
-                            {% for error in field.errors %}
-                                <p class="text-danger">{{ error }}</p>
-                            {% endfor %}
-                        {% elif field.field.widget.input_type == 'date'%}
-                            <label for="{{ field.name }}">{{ field.label_tag }}</label>
-                            <input
-                                type="date"
-                                value="{{ field.value|default_if_none:'' }}"
-                                name="{{ field.name }}"
-                            />
-                            
-                            {% for error in field.errors %}
-                                <p class="text-danger">{{ error }}</p>
-                            {% endfor %}
-                        {% elif field.field.widget.input_type == 'email'%}
-                            <label for="{{ field.name }}">{{ field.label_tag }}</label>
-                            <input
-                                type="email"
-                                value="{{ field.value|default_if_none:'' }}"
-                                name="{{ field.name }}"
-                            />
-                            
-                            {% for error in field.errors %}
-                                <p class="text-danger">{{ error }}</p>
-                            {% endfor %}
-                        {% elif field.field.widget.input_type == 'password'%}
-                            <label for="{{ field.name }}">{{ field.label_tag }}</label>
-                            <input
-                                type="password"
-                                value="{{ field.value|default_if_none:'' }}"
-                                name="{{ field.name }}"
-                            />
-                            
-                            {% for error in field.errors %}
-                                <p class="text-danger">{{ error }}</p>
-                            {% endfor %}
-                        {% endif %}
+                                        {% for error in field.errors %}
+                                            <p class="text-danger">{{ error }}</p>
+                                        {% endfor %}
+                                    {% endif %}
+                                {% elif field.field.widget.input_type == 'text' %}
+                                    <input
+                                        type="text"
+                                        value="{{ field.value|default_if_none:'' }}"
+                                        name="{{ field.name }}"
+                                    />
+                                    
+                                    {% for error in field.errors %}
+                                        <p class="text-danger">{{ error }}</p>
+                                    {% endfor %}
+                                {% elif field.field.widget.input_type == 'date'%} 
+                                    <input
+                                        type="date"
+                                        value="{{ field.value|default_if_none:'' }}"
+                                        name="{{ field.name }}"
+                                    />
+                                    
+                                    {% for error in field.errors %}
+                                        <p class="text-danger">{{ error }}</p>
+                                    {% endfor %}
+                                {% elif field.field.widget.input_type == 'email'%}
+                                    <input
+                                        type="email"
+                                        value="{{ field.value|default_if_none:'' }}"
+                                        name="{{ field.name }}"
+                                    />
+                                    
+                                    {% for error in field.errors %}
+                                        <p class="text-danger">{{ error }}</p>
+                                    {% endfor %}
+                                {% elif field.field.widget.input_type == 'password'%} 
+                                    <input
+                                        type="password"
+                                        value="{{ field.value|default_if_none:'' }}"
+                                        name="{{ field.name }}"
+                                    />
+                                    
+                                    {% for error in field.errors %}
+                                        <p class="text-danger">{{ error }}</p>
+                                    {% endfor %}
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                    <div class="col-4 mt-3 flex-grow-1 text-end">
+                        <button class="btn btn-sm bg-dark text-white mt-3" type="submit" name="action" value="search">Buscar</button>
+                        <button class="btn btn-sm bg-primary text-white mt-3" type="submit">Limpiar</button>
                     </div>
-                {% endfor %}
-                <div class="col-4 text-end">
-                    <button class="btn btn-sm bg-dark text-white mt-3" type="submit" name="action" value="search">Buscar</button>
-                    <button class="btn btn-sm bg-primary text-white mt-3" type="submit">Limpiar</button>
                 </div>
             </form>
         </div>
@@ -145,13 +155,24 @@
             {% for record in records %}
                 <tr>
                     {% for field in records_name %}
-                        <td scope="col" class="text-center">{{ record|getattr_filter:field.name }}</td>
+                        {% if record.status == 'Completado' %}
+                            <td scope="col" class="text-center text-white" id="bg-complete">{{ record|getattr_filter:field.name }}</td>
+                        {% else %}
+                            <td scope="col" class="text-center">{{ record|getattr_filter:field.name }}</td>
+                        {% endif %}
                     {% endfor %}
                     {% if request.user.role == 'A' %}
-                        <td class="col text-center">
-                            <a href='{{ request.scheme }}://{{ request.META.HTTP_HOST }}/detail/update/{{record.pk}}/' class="page-link border-0 bg-success text-white d-inline-block p-1 mx-2 mb-1 btn">Modificar</a>
-                            <a href='{{ request.scheme }}://{{ request.META.HTTP_HOST }}/detail/delete/{{record.pk}}/' class="page-link border-0 bg-danger text-white d-inline-block p-1 mx-2 mb-1 btn">Eliminar</a>
-                        </td>
+                        {% if record.status == 'Completado' %}
+                            <td class="col text-center" id="bg-complete">
+                                <a href='{{ request.scheme }}://{{ request.META.HTTP_HOST }}/detail/update/{{record.pk}}/' class="page-link border-0 bg-success text-white d-inline-block p-1 mx-2 mb-1 btn">Modificar</a>
+                                <a href='{{ request.scheme }}://{{ request.META.HTTP_HOST }}/detail/delete/{{record.pk}}/' class="page-link border-0 bg-danger text-white d-inline-block p-1 mx-2 mb-1 btn">Eliminar</a>
+                            </td>
+                        {% else %}
+                            <td class="col text-center">
+                                <a href='{{ request.scheme }}://{{ request.META.HTTP_HOST }}/detail/update/{{record.pk}}/' class="page-link border-0 bg-success text-white d-inline-block p-1 mx-2 mb-1 btn">Modificar</a>
+                                <a href='{{ request.scheme }}://{{ request.META.HTTP_HOST }}/detail/delete/{{record.pk}}/' class="page-link border-0 bg-danger text-white d-inline-block p-1 mx-2 mb-1 btn">Eliminar</a>
+                            </td>
+                        {% endif %}
                     {% endif %}
                 </tr>
             {% endfor %}
@@ -178,23 +199,27 @@
             var filasHTML = tablaHTML.getElementsByTagName('tr');
             for (var i = 0; i < filasHTML.length; i++) {
                 var celdasHTML = filasHTML[i].getElementsByTagName('th');
-
+                
                 for (var j = 0; j < celdasHTML.length; j++) {
                     var valorCelda = celdasHTML[j].innerText;
-
-                    hoja.getCell(String.fromCharCode(65 + j) + (i + 1)).value = valorCelda;             
+                    
+                    if(valorCelda != 'Acciones'){
+                        hoja.getCell(String.fromCharCode(65 + j) + (i + 1)).value = valorCelda;   
+                    }          
                 }
             }
-            // Valores de las columnas
             
+            // Valores de las columnas
             var filasHTML = tablaHTML.getElementsByTagName('tr');
             for (var i = 0; i < filasHTML.length; i++) {
                 var celdasHTML = filasHTML[i].getElementsByTagName('td');
 
                 for (var j = 0; j < celdasHTML.length; j++) {
-                var valorCelda = celdasHTML[j].innerText;
+                    var valorCelda = celdasHTML[j].innerText;
 
-                hoja.getCell(String.fromCharCode(65 + j) + (i + 1)).value = valorCelda;
+                    if(valorCelda != 'Modificar Eliminar'){
+                        hoja.getCell(String.fromCharCode(65 + j) + (i + 1)).value = valorCelda;
+                    }
                 }
             }
 

@@ -1,14 +1,13 @@
-from django.shortcuts import render, redirect, resolve_url
+from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.decorators import login_required
 
-from .forms import SignUpForm, SignUpUpdateForm, LoginForm, WorkAxeForm, ActivitieForm, ResponsibleForm, MasterPlanForm, DetailForm, FilterForm
-from .models import CustomUser, WorkAxe, Activitie, Responsible, MasterPlan, Detail, master_plan_status
+from .forms import SignUpForm, SignUpUpdateForm, LoginForm, WorkAxeForm, ActivitieForm, MasterPlanForm, DetailForm, FilterForm
+from .models import CustomUser, WorkAxe, Activitie, MasterPlan, Detail, master_plan_status, detail_status
 
 from .functions import is_admin 
 import datetime
-import re
 
 # Authentication
 def SignUpView(request):
@@ -36,7 +35,7 @@ def SignUpView(request):
     else:
         form = SignUpForm()
 
-    return render(request=request, template_name='create.html', context={'form': form})
+    return render(request=request, template_name='create.html', context={'form': form, 'previous_url':request.session.get('previous_url', '/')})
 
 def LoginView(request):
     
@@ -67,6 +66,8 @@ def LogoutView(request):
 # Main views
 @login_required
 def MasterDetailView(request, pk):
+    request.session['previous_url'] = request.get_full_path()
+
     if request.method == 'GET':
         form = FilterForm()
         
@@ -82,6 +83,9 @@ def MasterDetailView(request, pk):
             records = Detail.objects.filter(master_plan=master.id)
         else:
             records = Detail.objects.filter(master_plan=master.id, responsible=request.user.id)
+
+        for instance in records:
+            instance.status = dict(detail_status)[instance.status]
     
     if request.method == 'POST':
         form = FilterForm(request.POST)
@@ -107,6 +111,7 @@ def MasterDetailView(request, pk):
                 work_axe = form.cleaned_data['work_axe']
                 activity = form.cleaned_data['activity']
                 responsible = form.cleaned_data['responsible']
+                status = form.cleaned_data['status']
                 scheduled_date = form.cleaned_data['scheduled_date']
                 completed_date = form.cleaned_data['completed_date']
 
@@ -116,12 +121,17 @@ def MasterDetailView(request, pk):
                     records = records.filter(activity=activity)
                 if responsible:
                     records = records.filter(responsible=responsible)
+                if status:
+                    records = records.filter(status=status)
                 if scheduled_date:
                     records = records.filter(scheduled_date=scheduled_date)
                 if completed_date:
                     records = records.filter(completed_date=completed_date)
 
-                form = FilterForm(initial={'work_axe':work_axe, 'activity':activity, 'responsible':responsible, 'scheduled_date':scheduled_date, 'completed_date':completed_date})
+                form = FilterForm(initial={'work_axe':work_axe, 'activity':activity, 'responsible':responsible, 'status':status, 'scheduled_date':scheduled_date, 'completed_date':completed_date})
+
+            for instance in records:
+                instance.status = dict(detail_status)[instance.status]
 
             return render(request=request, template_name='master-detail.html', context={'master':master, 'master-names':master_names, 'records':records, 'records_name':records_name, 'form':form}) 
     return render(request=request, template_name='master-detail.html', context={'master':master, 'master-names':master_names, 'records':records, 'records_name':records_name, 'form':form})
@@ -129,6 +139,7 @@ def MasterDetailView(request, pk):
 @login_required
 # WorkAxe Logic Views
 def ListWorkAxeView(request):
+    request.session['previous_url'] = request.get_full_path()
 
     records = WorkAxe.objects.all()
     records_name = WorkAxe._meta.fields
@@ -146,11 +157,11 @@ def CreateWorkAxeView(request):
             work_axe.name = request.POST['name']
             work_axe.save()
 
-            return redirect('work-axe')
+            return redirect(request.session.get('previous_url', '/'))
     else:
         form = WorkAxeForm()
 
-    return render(request=request, template_name='create.html', context={'form': form})
+    return render(request=request, template_name='create.html', context={'form': form, 'previous_url':request.session.get('previous_url', '/')})
 
 @login_required
 def UpdateWorkAxeView(request, pk):
@@ -164,11 +175,11 @@ def UpdateWorkAxeView(request, pk):
             work_axe.name = request.POST['name']
             work_axe.save()
 
-            return redirect('work-axe')
+            return redirect(request.session.get('previous_url', '/'))
     else:
         form = WorkAxeForm(initial={'name':work_axe.name})
 
-    return render(request=request, template_name='update.html', context={'form': form})
+    return render(request=request, template_name='update.html', context={'form': form, 'previous_url':request.session.get('previous_url', '/')})
 
 @login_required
 def DeleteWorkAxeView(request, pk):
@@ -178,13 +189,14 @@ def DeleteWorkAxeView(request, pk):
     if request.POST:
         record.delete()
 
-        return redirect('work-axe')
+        return redirect(request.session.get('previous_url', '/'))
 
-    return render(request=request, template_name='delete.html')
+    return render(request=request, template_name='delete.html', context={'previous_url':request.session.get('previous_url', '/')})
 
 # Activity Logic Views
 @login_required
 def ListActivityView(request):
+    request.session['previous_url'] = request.get_full_path()
 
     records = Activitie.objects.all()
     records_name = Activitie._meta.fields
@@ -201,11 +213,11 @@ def CreateActivityView(request):
             work_axe = WorkAxe.objects.get(id=request.POST['work_axe'])
             activity = Activitie.objects.create(work_axe=work_axe, name=request.POST['name'])
             
-            return redirect('activity')
+            return redirect(request.session.get('previous_url', '/'))
     else:
         form = ActivitieForm()
 
-    return render(request=request, template_name='create.html', context={'form': form})
+    return render(request=request, template_name='create.html', context={'form': form, 'previous_url':request.session.get('previous_url', '/')})
 
 @login_required
 def UpdateActivityView(request, pk):
@@ -222,11 +234,11 @@ def UpdateActivityView(request, pk):
             activity.name = request.POST['name']
             activity.save()
 
-            return redirect('activity')
+            return redirect(request.session.get('previous_url', '/'))
     else:
         form = ActivitieForm(initial={'work_axe':activity.work_axe, 'name':activity.name})
 
-    return render(request=request, template_name='update.html', context={'form': form})
+    return render(request=request, template_name='update.html', context={'form': form, 'previous_url':request.session.get('previous_url', '/')})
 
 @login_required
 def DeleteActivityView(request, pk):
@@ -236,13 +248,14 @@ def DeleteActivityView(request, pk):
     if request.POST:
         record.delete()
 
-        return redirect('activity')
+        return redirect(request.session.get('previous_url', '/'))
 
-    return render(request=request, template_name='delete.html')
+    return render(request=request, template_name='delete.html', context={'previous_url':request.session.get('previous_url', '/')})
 
 # Responsible Logic Views
 @login_required
 def ListResponsibleView(request):
+    request.session['previous_url'] = request.get_full_path()
 
     records = CustomUser.objects.all()
     records_name = CustomUser._meta.fields
@@ -277,11 +290,11 @@ def CreateResponsibleView(request):
             responsible.password = make_password(password)
             responsible.save()
 
-            return redirect('responsible')
+            return redirect(request.session.get('previous_url', '/'))
     else:
         form = SignUpForm()
 
-    return render(request=request, template_name='create.html', context={'form': form})
+    return render(request=request, template_name='create.html', context={'form': form, 'previous_url':request.session.get('previous_url', '/')})
 
 @login_required
 def UpdateResponsibleView(request, pk):
@@ -295,12 +308,12 @@ def UpdateResponsibleView(request, pk):
         password_confirmation = request.POST['password_confirmation']
 
         if form.is_valid():
-            if password_confirmation != None and password != None and password != password_confirmation:
+            if password_confirmation != '' and password != '' and password != password_confirmation:
                 form.add_error('password', 'Las contraseñas no coinciden.')
                 
                 return render(request=request, template_name='create.html', context={'form': form})
-
-            if password != None:
+            
+            if password != '' and password_confirmation != '':
                 responsible.password = make_password(password)
 
             responsible.first_name = request.POST['first_name']
@@ -308,7 +321,7 @@ def UpdateResponsibleView(request, pk):
             responsible.email = request.POST['email']
             responsible.save()
 
-            return redirect('responsible')
+            return redirect(request.session.get('previous_url', '/'))
     else:
         form = SignUpUpdateForm(initial={
             'first_name':responsible.first_name,
@@ -316,7 +329,7 @@ def UpdateResponsibleView(request, pk):
             'email': responsible.email,
             })
 
-    return render(request=request, template_name='update.html', context={'form': form})
+    return render(request=request, template_name='update.html', context={'form': form, 'previous_url':request.session.get('previous_url', '/')})
 
 @login_required
 def DeleteResponsibleView(request, pk):
@@ -326,13 +339,14 @@ def DeleteResponsibleView(request, pk):
     if request.POST:
         record.delete()
 
-        return redirect('responsible')
+        return redirect(request.session.get('previous_url', '/'))
 
-    return render(request=request, template_name='delete.html')
+    return render(request=request, template_name='delete.html', context={'previous_url':request.session.get('previous_url', '/')})
 
 # MasterPlan Logic Views
 @login_required
 def ListMasterPlanView(request):
+    request.session['previous_url'] = request.get_full_path()
 
     records = MasterPlan.objects.all()
     records_name = MasterPlan._meta.fields
@@ -355,11 +369,11 @@ def CreateMasterPlanView(request):
             master_plan.notes = request.POST['notes']
             master_plan.save()
 
-            return redirect('master-plan')
+            return redirect(request.session.get('previous_url', '/'))
     else:
         form = MasterPlanForm()
 
-    return render(request=request, template_name='create.html', context={'form': form})
+    return render(request=request, template_name='create.html', context={'form': form, 'previous_url':request.session.get('previous_url', '/')})
 
 @login_required
 def UpdateMasterPlanView(request, pk):
@@ -376,7 +390,7 @@ def UpdateMasterPlanView(request, pk):
             master_plan.notes = request.POST['notes']
             master_plan.save()
 
-            return redirect('master-plan')
+            return redirect(request.session.get('previous_url', '/'))
     else:
         form = MasterPlanForm(initial={
             'name':master_plan.name,
@@ -385,7 +399,7 @@ def UpdateMasterPlanView(request, pk):
             'notes':master_plan.notes
             })
 
-    return render(request=request, template_name='update.html', context={'form': form})
+    return render(request=request, template_name='update.html', context={'form': form, 'previous_url':request.session.get('previous_url', '/')})
 
 @login_required
 def DeleteMasterPlanView(request, pk):
@@ -395,16 +409,20 @@ def DeleteMasterPlanView(request, pk):
     if request.POST:
         record.delete()
 
-        return redirect('master-plan')
+        return redirect(request.session.get('previous_url', '/'))
 
-    return render(request=request, template_name='delete.html')
+    return render(request=request, template_name='delete.html', context={'previous_url':request.session.get('previous_url', '/')})
 
 # Detail Logic Views
 @login_required
 def ListDetailView(request):
+    request.session['previous_url'] = request.get_full_path()
 
     records = Detail.objects.all()
     records_name = Detail._meta.fields
+
+    for instance in records:
+        instance.status = dict(detail_status)[instance.status]
 
     return render(request=request, template_name='list.html', context={'records': records, 'records_name': records_name})
 
@@ -429,17 +447,18 @@ def CreateDetailView(request):
                 work_axe=work_axe,
                 activity=activity,
                 responsible=responsible,
+                status=request.POST['status'],
                 scheduled_date=request.POST['scheduled_date'],
                 completed_date=complete_date,
                 evaluation = request.POST['evaluation'],
                 observations = request.POST['observations']
             )
 
-            return redirect('detail')
+            return redirect(request.session.get('previous_url', '/'))
     else:
         form = DetailForm()
 
-    return render(request=request, template_name='create.html', context={'form': form})
+    return render(request=request, template_name='create.html', context={'form': form, 'previous_url':request.session.get('previous_url', '/')})
 
 @login_required
 def CreateMasterDetailView(request, pk):
@@ -464,24 +483,19 @@ def CreateMasterDetailView(request, pk):
                 work_axe=work_axe,
                 activity=activity,
                 responsible=responsible,
+                status=request.POST['status'],
                 scheduled_date=request.POST['scheduled_date'],
                 completed_date=complete_date,
                 evaluation = request.POST['evaluation'],
                 observations = request.POST['observations']
             )
-            url_actual = request.build_absolute_uri()
-
-            nueva_url = re.sub(f'/detail/create/{pk}/', '', url_actual)
-            
-            nueva_url += f'/master/plan/details/{pk}/'
-
-            return redirect(nueva_url)
+            return redirect(request.session.get('previous_url', '/'))
     else:
         form = DetailForm(initial={
             'master_plan':master.id
         })
 
-    return render(request=request, template_name='create.html', context={'form': form})
+    return render(request=request, template_name='create.html', context={'form': form, 'previous_url':request.session.get('previous_url', '/')})
 
 @login_required
 def UpdateDetailView(request, pk):
@@ -505,29 +519,32 @@ def UpdateDetailView(request, pk):
             detail.work_axe=work_axe
             detail.activity=activity
             detail.responsible=responsible
+            detail.status = request.POST['status']
             detail.scheduled_date = request.POST['scheduled_date']
             detail.completed_date = complete_date
             detail.evaluation = request.POST['evaluation']
             detail.observations = request.POST['observations']
             detail.save()
 
-            return redirect('detail')
+            return redirect(request.session.get('previous_url', '/'))
     else:
         try:
             complete_date = detail.completed_date.strftime('%Y-%m-%d'),
         except AttributeError:
             complete_date = datetime.datetime.now().strftime('%Y-%m-%d')
+        
         form = DetailForm(initial={
             'master_plan':detail.master_plan,
             'work_axe':detail.work_axe,
             'activity':detail.activity,
             'responsible':detail.responsible,
+            'status':detail.status,
             'scheduled_date':detail.scheduled_date.strftime('%Y-%m-%d'),
             'evaluation':detail.evaluation,
             'observations':detail.observations
             })
 
-    return render(request=request, template_name='update.html', context={'form': form})
+    return render(request=request, template_name='update.html', context={'form': form, 'previous_url':request.session.get('previous_url', '/')})
 
 @login_required
 def DeleteDetailView(request, pk):
@@ -537,6 +554,6 @@ def DeleteDetailView(request, pk):
     if request.POST:
         record.delete()
 
-        return redirect('detail')
+        return redirect(request.session.get('previous_url', '/'))
 
-    return render(request=request, template_name='delete.html')
+    return render(request=request, template_name='delete.html', context={'previous_url':request.session.get('previous_url', '/')})
