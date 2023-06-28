@@ -308,12 +308,12 @@ def UpdateResponsibleView(request, pk):
         password_confirmation = request.POST['password_confirmation']
 
         if form.is_valid():
-            if password_confirmation != None and password != None and password != password_confirmation:
+            if password_confirmation != '' and password != '' and password != password_confirmation:
                 form.add_error('password', 'Las contraseñas no coinciden.')
                 
                 return render(request=request, template_name='create.html', context={'form': form})
-
-            if password != None:
+            
+            if password != '' and password_confirmation != '':
                 responsible.password = make_password(password)
 
             responsible.first_name = request.POST['first_name']
