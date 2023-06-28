@@ -3,7 +3,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.decorators import login_required
 
-from .forms import SignUpForm, SignUpUpdateForm, LoginForm, WorkAxeForm, ActivitieForm, ResponsibleForm, MasterPlanForm, DetailForm
+from .forms import SignUpForm, SignUpUpdateForm, LoginForm, WorkAxeForm, ActivitieForm, ResponsibleForm, MasterPlanForm, DetailForm, FilterForm
 from .models import CustomUser, WorkAxe, Activitie, Responsible, MasterPlan, Detail, master_plan_status
 
 from .functions import is_admin 
@@ -67,19 +67,64 @@ def LogoutView(request):
 # Main views
 @login_required
 def MasterDetailView(request, pk):
-    excluded_fields = ['master_plan']
+    if request.method == 'GET':
+        form = FilterForm()
+        
+        master = MasterPlan.objects.get(id=pk)
+        master_names = MasterPlan._meta.fields
 
-    master = MasterPlan.objects.get(id=pk)
-    master_names = MasterPlan._meta.fields
+        # Normal
+        excluded_fields = ['master_plan']
 
-    records_name = [field for field in Detail._meta.fields if field.name not in excluded_fields]
+        records_name = [field for field in Detail._meta.fields if field.name not in excluded_fields]
+        
+        if is_admin(request.user) == True:
+            records = Detail.objects.filter(master_plan=master.id)
+        else:
+            records = Detail.objects.filter(master_plan=master.id, responsible=request.user.id)
     
-    if is_admin(request.user) == True:
-        records = Detail.objects.filter(master_plan=master.id)
-    else:
-        records = Detail.objects.filter(master_plan=master.id, responsible=request.user.id)
-    
-    return render(request=request, template_name='master-detail.html', context={'master':master, 'master-names':master_names, 'records':records, 'records_name':records_name})
+    if request.method == 'POST':
+        form = FilterForm(request.POST)
+
+        master = MasterPlan.objects.get(id=pk)
+        master_names = MasterPlan._meta.fields
+
+        # Normal
+        excluded_fields = ['master_plan']
+
+        records_name = [field for field in Detail._meta.fields if field.name not in excluded_fields]
+        
+        if is_admin(request.user) == True:
+            records = Detail.objects.filter(master_plan=master.id)
+        else:
+            records = Detail.objects.filter(master_plan=master.id, responsible=request.user.id)
+        
+        if form.is_valid():
+            action = request.POST.get('action')
+            
+            if action == 'search':
+                # Filters
+                work_axe = form.cleaned_data['work_axe']
+                activity = form.cleaned_data['activity']
+                responsible = form.cleaned_data['responsible']
+                scheduled_date = form.cleaned_data['scheduled_date']
+                completed_date = form.cleaned_data['completed_date']
+
+                if work_axe:
+                    records = records.filter(work_axe=work_axe)
+                if activity:
+                    records = records.filter(activity=activity)
+                if responsible:
+                    records = records.filter(responsible=responsible)
+                if scheduled_date:
+                    records = records.filter(scheduled_date=scheduled_date)
+                if completed_date:
+                    records = records.filter(completed_date=completed_date)
+
+                form = FilterForm(initial={'work_axe':work_axe, 'activity':activity, 'responsible':responsible, 'scheduled_date':scheduled_date, 'completed_date':completed_date})
+
+            return render(request=request, template_name='master-detail.html', context={'master':master, 'master-names':master_names, 'records':records, 'records_name':records_name, 'form':form}) 
+    return render(request=request, template_name='master-detail.html', context={'master':master, 'master-names':master_names, 'records':records, 'records_name':records_name, 'form':form})
 
 @login_required
 # WorkAxe Logic Views
