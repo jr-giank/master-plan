@@ -207,3 +207,46 @@ class DetailForm(forms.Form):
             'required': 'Este campo es requerido.',
             'invalid': 'El valor ingresado es inválido.',
         })
+
+class FilterForm(forms.Form):
+
+    work_axe = forms.ModelChoiceField(
+        label=('Eje de trabajo'), 
+        queryset=WorkAxe.objects.all(),
+        required=False,
+        error_messages={
+            'required': 'Este campo es requerido.',
+            'invalid': 'El valor ingresado es inválido.',
+        })
+    activity = forms.ModelChoiceField(
+        label=('Actividad'), 
+        queryset=Activitie.objects.all(),
+        required=False,
+        error_messages={
+            'required': 'Este campo es requerido.',
+            'invalid': 'El valor ingresado es inválido.',
+        })
+    responsible = forms.ModelChoiceField(
+        label=('Responsable'), 
+        queryset=CustomUser.objects.all(),
+        required=False,
+        error_messages={
+            'required': 'Este campo es requerido.',
+            'invalid': 'El valor ingresado es inválido.',
+        })
+    scheduled_date = forms.DateField(
+        label=('Fecha programada'), 
+        required=False,
+        widget=DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+        error_messages={
+            'required': 'Este campo es requerido.',
+            'invalid': 'El valor ingresado es inválido.',
+        })
+    completed_date = forms.DateField(
+        label=('Fecha completada'), 
+        required=False,
+        widget=DateInput(attrs={'class': 'form-control', 'type': 'date'}), 
+        error_messages={
+            'required': 'Este campo es requerido.',
+            'invalid': 'El valor ingresado es inválido.',
+        })

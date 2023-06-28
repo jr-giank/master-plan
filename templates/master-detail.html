@@ -54,6 +54,80 @@
                 <a class="page-link border-0 bg-secondary text-white d-inline-block py-1 px-2 btn" onclick="exportTableToExcel()">Imprimir</a></button>
             </div>
         </div>
+        <div class="row">
+            <form method="post" class="row">
+                {% csrf_token %}
+
+                {% for field in form %}
+                    <div class="col mt-3">
+                        {% if field.field.widget.input_type == 'select' %}
+                            <label for="{{ field.name }}">{{ field.label_tag }}</label>
+                            <select name="{{ field.name }}">
+                                {% for choice in field.field.choices %}
+                                    {% if field.value == choice.0 %}
+                                        <option value="{{ choice.0 }}" selected>{{ choice.1 }}</option>
+                                    {% else %}
+                                        <option value="{{ choice.0 }}">{{ choice.1 }}</option>
+                                    {% endif %}
+                                {% endfor %}
+                            </select>
+
+                            {% for error in field.errors %}
+                                <p class="text-danger">{{ error }}</p>
+                            {% endfor %}
+                        {% elif field.field.widget.input_type == 'text' %}
+                            <label for="{{ field.name }}">{{ field.label_tag }}</label>
+                            <input
+                                type="text"
+                                value="{{ field.value|default_if_none:'' }}"
+                                name="{{ field.name }}"
+                            />
+                            
+                            {% for error in field.errors %}
+                                <p class="text-danger">{{ error }}</p>
+                            {% endfor %}
+                        {% elif field.field.widget.input_type == 'date'%}
+                            <label for="{{ field.name }}">{{ field.label_tag }}</label>
+                            <input
+                                type="date"
+                                value="{{ field.value|default_if_none:'' }}"
+                                name="{{ field.name }}"
+                            />
+                            
+                            {% for error in field.errors %}
+                                <p class="text-danger">{{ error }}</p>
+                            {% endfor %}
+                        {% elif field.field.widget.input_type == 'email'%}
+                            <label for="{{ field.name }}">{{ field.label_tag }}</label>
+                            <input
+                                type="email"
+                                value="{{ field.value|default_if_none:'' }}"
+                                name="{{ field.name }}"
+                            />
+                            
+                            {% for error in field.errors %}
+                                <p class="text-danger">{{ error }}</p>
+                            {% endfor %}
+                        {% elif field.field.widget.input_type == 'password'%}
+                            <label for="{{ field.name }}">{{ field.label_tag }}</label>
+                            <input
+                                type="password"
+                                value="{{ field.value|default_if_none:'' }}"
+                                name="{{ field.name }}"
+                            />
+                            
+                            {% for error in field.errors %}
+                                <p class="text-danger">{{ error }}</p>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                {% endfor %}
+                <div class="col-4 text-end">
+                    <button class="btn btn-sm bg-dark text-white mt-3" type="submit" name="action" value="search">Buscar</button>
+                    <button class="btn btn-sm bg-primary text-white mt-3" type="submit">Limpiar</button>
+                </div>
+            </form>
+        </div>
     </div>
 
     <table class="table" id="tabla">
