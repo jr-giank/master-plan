@@ -35,7 +35,7 @@ def SignUpView(request):
     else:
         form = SignUpForm()
 
-    return render(request=request, template_name='create.html', context={'form': form})
+    return render(request=request, template_name='create.html', context={'form': form, 'previous_url':request.session.get('previous_url', '/')})
 
 def LoginView(request):
     
@@ -161,7 +161,7 @@ def CreateWorkAxeView(request):
     else:
         form = WorkAxeForm()
 
-    return render(request=request, template_name='create.html', context={'form': form})
+    return render(request=request, template_name='create.html', context={'form': form, 'previous_url':request.session.get('previous_url', '/')})
 
 @login_required
 def UpdateWorkAxeView(request, pk):
@@ -179,7 +179,7 @@ def UpdateWorkAxeView(request, pk):
     else:
         form = WorkAxeForm(initial={'name':work_axe.name})
 
-    return render(request=request, template_name='update.html', context={'form': form})
+    return render(request=request, template_name='update.html', context={'form': form, 'previous_url':request.session.get('previous_url', '/')})
 
 @login_required
 def DeleteWorkAxeView(request, pk):
@@ -191,7 +191,7 @@ def DeleteWorkAxeView(request, pk):
 
         return redirect(request.session.get('previous_url', '/'))
 
-    return render(request=request, template_name='delete.html')
+    return render(request=request, template_name='delete.html', context={'previous_url':request.session.get('previous_url', '/')})
 
 # Activity Logic Views
 @login_required
@@ -217,7 +217,7 @@ def CreateActivityView(request):
     else:
         form = ActivitieForm()
 
-    return render(request=request, template_name='create.html', context={'form': form})
+    return render(request=request, template_name='create.html', context={'form': form, 'previous_url':request.session.get('previous_url', '/')})
 
 @login_required
 def UpdateActivityView(request, pk):
@@ -238,7 +238,7 @@ def UpdateActivityView(request, pk):
     else:
         form = ActivitieForm(initial={'work_axe':activity.work_axe, 'name':activity.name})
 
-    return render(request=request, template_name='update.html', context={'form': form})
+    return render(request=request, template_name='update.html', context={'form': form, 'previous_url':request.session.get('previous_url', '/')})
 
 @login_required
 def DeleteActivityView(request, pk):
@@ -250,7 +250,7 @@ def DeleteActivityView(request, pk):
 
         return redirect(request.session.get('previous_url', '/'))
 
-    return render(request=request, template_name='delete.html')
+    return render(request=request, template_name='delete.html', context={'previous_url':request.session.get('previous_url', '/')})
 
 # Responsible Logic Views
 @login_required
@@ -294,7 +294,7 @@ def CreateResponsibleView(request):
     else:
         form = SignUpForm()
 
-    return render(request=request, template_name='create.html', context={'form': form})
+    return render(request=request, template_name='create.html', context={'form': form, 'previous_url':request.session.get('previous_url', '/')})
 
 @login_required
 def UpdateResponsibleView(request, pk):
@@ -329,7 +329,7 @@ def UpdateResponsibleView(request, pk):
             'email': responsible.email,
             })
 
-    return render(request=request, template_name='update.html', context={'form': form})
+    return render(request=request, template_name='update.html', context={'form': form, 'previous_url':request.session.get('previous_url', '/')})
 
 @login_required
 def DeleteResponsibleView(request, pk):
@@ -341,7 +341,7 @@ def DeleteResponsibleView(request, pk):
 
         return redirect(request.session.get('previous_url', '/'))
 
-    return render(request=request, template_name='delete.html')
+    return render(request=request, template_name='delete.html', context={'previous_url':request.session.get('previous_url', '/')})
 
 # MasterPlan Logic Views
 @login_required
@@ -373,7 +373,7 @@ def CreateMasterPlanView(request):
     else:
         form = MasterPlanForm()
 
-    return render(request=request, template_name='create.html', context={'form': form})
+    return render(request=request, template_name='create.html', context={'form': form, 'previous_url':request.session.get('previous_url', '/')})
 
 @login_required
 def UpdateMasterPlanView(request, pk):
@@ -399,7 +399,7 @@ def UpdateMasterPlanView(request, pk):
             'notes':master_plan.notes
             })
 
-    return render(request=request, template_name='update.html', context={'form': form})
+    return render(request=request, template_name='update.html', context={'form': form, 'previous_url':request.session.get('previous_url', '/')})
 
 @login_required
 def DeleteMasterPlanView(request, pk):
@@ -411,7 +411,7 @@ def DeleteMasterPlanView(request, pk):
 
         return redirect(request.session.get('previous_url', '/'))
 
-    return render(request=request, template_name='delete.html')
+    return render(request=request, template_name='delete.html', context={'previous_url':request.session.get('previous_url', '/')})
 
 # Detail Logic Views
 @login_required
@@ -458,7 +458,7 @@ def CreateDetailView(request):
     else:
         form = DetailForm()
 
-    return render(request=request, template_name='create.html', context={'form': form})
+    return render(request=request, template_name='create.html', context={'form': form, 'previous_url':request.session.get('previous_url', '/')})
 
 @login_required
 def CreateMasterDetailView(request, pk):
@@ -495,7 +495,7 @@ def CreateMasterDetailView(request, pk):
             'master_plan':master.id
         })
 
-    return render(request=request, template_name='create.html', context={'form': form})
+    return render(request=request, template_name='create.html', context={'form': form, 'previous_url':request.session.get('previous_url', '/')})
 
 @login_required
 def UpdateDetailView(request, pk):
@@ -544,7 +544,7 @@ def UpdateDetailView(request, pk):
             'observations':detail.observations
             })
 
-    return render(request=request, template_name='update.html', context={'form': form})
+    return render(request=request, template_name='update.html', context={'form': form, 'previous_url':request.session.get('previous_url', '/')})
 
 @login_required
 def DeleteDetailView(request, pk):
@@ -556,4 +556,4 @@ def DeleteDetailView(request, pk):
 
         return redirect(request.session.get('previous_url', '/'))
 
-    return render(request=request, template_name='delete.html')
+    return render(request=request, template_name='delete.html', context={'previous_url':request.session.get('previous_url', '/')})
