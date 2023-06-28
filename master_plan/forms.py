@@ -1,6 +1,6 @@
 from django import forms
 from django.forms.widgets import DateInput
-from .models import CustomUser, WorkAxe, Activitie, Responsible, MasterPlan, master_plan_status
+from .models import CustomUser, WorkAxe, Activitie, MasterPlan, master_plan_status, detail_status
 
 class SignUpForm(forms.Form):
     
@@ -115,14 +115,6 @@ class ActivitieForm(forms.Form):
             'invalid': 'El valor ingresado es inválido.',
         })
 
-class ResponsibleForm(forms.Form):
-    name = forms.CharField(
-        label=('Responsable'),
-        error_messages={
-            'required': 'Este campo es requerido.',
-            'invalid': 'El valor ingresado es inválido.',
-        }) 
-
 class MasterPlanForm(forms.Form):
     name = forms.CharField(
         label='Master plan',
@@ -172,6 +164,13 @@ class DetailForm(forms.Form):
     responsible = forms.ModelChoiceField(
         label=('Responsable'), 
         queryset=CustomUser.objects.all(),
+        error_messages={
+            'required': 'Este campo es requerido.',
+            'invalid': 'El valor ingresado es inválido.',
+        })
+    status = forms.ChoiceField(
+        label='Estado', 
+        choices=detail_status,
         error_messages={
             'required': 'Este campo es requerido.',
             'invalid': 'El valor ingresado es inválido.',
@@ -229,6 +228,14 @@ class FilterForm(forms.Form):
     responsible = forms.ModelChoiceField(
         label=('Responsable'), 
         queryset=CustomUser.objects.all(),
+        required=False,
+        error_messages={
+            'required': 'Este campo es requerido.',
+            'invalid': 'El valor ingresado es inválido.',
+        })
+    status = forms.ChoiceField(
+        label='Estado', 
+        choices=detail_status,
         required=False,
         error_messages={
             'required': 'Este campo es requerido.',

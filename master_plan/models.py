@@ -11,6 +11,11 @@ master_plan_status = [
     ('B', 'Cerrado')
 ]
 
+detail_status = [
+    ('A', 'No Completado'),
+    ('B', 'Completado')
+]
+
 class CustomUser(AbstractUser):
 
     """ User custom model for authentication process in the application """
@@ -46,15 +51,6 @@ class Activitie(models.Model):
     def __str__(self):
         return self.name
 
-class Responsible(models.Model):
-    
-    """ Responsible model to say the responsible person for complete the task """
-    
-    name = models.CharField(max_length=75, null=False, blank=False, verbose_name='Nombre')
-
-    def __str__(self):
-        return self.name
-
 class MasterPlan(models.Model):
 
     """ Master plan model for a project """
@@ -76,6 +72,7 @@ class Detail(models.Model):
     work_axe = models.ForeignKey(to=WorkAxe, null=True, blank=True, on_delete=models.SET_NULL, verbose_name='Eje de trabajo')
     activity = models.ForeignKey(to=Activitie, null=True, blank=True, on_delete=models.SET_NULL, verbose_name='Actividad')
     responsible = models.ForeignKey(to=CustomUser, null=True, blank=True, on_delete=models.SET_NULL, verbose_name='Responsable')
+    status = models.CharField(max_length=13, choices=detail_status, default='A', verbose_name='Estado')
     scheduled_date = models.DateField(null=False, blank=False, verbose_name='Fecha programada')
     completed_date = models.DateField(null=True, blank=True, verbose_name='Fecha completada')
     evaluation = models.TextField(null=True, blank=True, verbose_name='Evaluación')
