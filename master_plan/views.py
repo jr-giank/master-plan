@@ -2,9 +2,10 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.decorators import login_required
+from django.db.models import Q
 
-from .forms import SignUpForm, SignUpUpdateForm, LoginForm, WorkAxeForm, ActivitieForm, MasterPlanForm, DetailForm, FilterForm
-from .models import CustomUser, WorkAxe, Activitie, MasterPlan, Detail, master_plan_status, detail_status
+from .forms import SignUpForm, SignUpUpdateForm, LoginForm, ComponentForm, ActivitieForm, MasterPlanForm, DetailForm, FilterForm
+from .models import CustomUser, Component, Activitie, MasterPlan, Detail, master_plan_status, detail_status
 
 from .functions import is_admin 
 import datetime
@@ -82,7 +83,11 @@ def MasterDetailView(request, pk):
         if is_admin(request.user) == True:
             records = Detail.objects.filter(master_plan=master.id)
         else:
-            records = Detail.objects.filter(master_plan=master.id, responsible=request.user.id)
+            records = Detail.objects.filter(
+                Q(goal_manager=request.user.id) |
+                Q(activity_manager=request.user.id) |
+                Q(supervision_manager=request.user.id),
+                master_plan=master.id)
 
         for instance in records:
             instance.status = dict(detail_status)[instance.status]
@@ -101,22 +106,26 @@ def MasterDetailView(request, pk):
         if is_admin(request.user) == True:
             records = Detail.objects.filter(master_plan=master.id)
         else:
-            records = Detail.objects.filter(master_plan=master.id, responsible=request.user.id)
+            records = Detail.objects.filter(
+                Q(goal_manager=request.user.id) |
+                Q(activity_manager=request.user.id) |
+                Q(supervision_manager=request.user.id),
+                master_plan=master.id)
         
         if form.is_valid():
             action = request.POST.get('action')
             
             if action == 'search':
                 # Filters
-                work_axe = form.cleaned_data['work_axe']
+                component = form.cleaned_data['component']
                 activity = form.cleaned_data['activity']
                 responsible = form.cleaned_data['responsible']
                 status = form.cleaned_data['status']
                 scheduled_date = form.cleaned_data['scheduled_date']
                 completed_date = form.cleaned_data['completed_date']
 
-                if work_axe:
-                    records = records.filter(work_axe=work_axe)
+                if component:
+                    records = records.filter(component=component)
                 if activity:
                     records = records.filter(activity=activity)
                 if responsible:
@@ -128,7 +137,7 @@ def MasterDetailView(request, pk):
                 if completed_date:
                     records = records.filter(completed_date=completed_date)
 
-                form = FilterForm(initial={'work_axe':work_axe, 'activity':activity, 'responsible':responsible, 'status':status, 'scheduled_date':scheduled_date, 'completed_date':completed_date})
+                form = FilterForm(initial={'component':component, 'activity':activity, 'responsible':responsible, 'status':status, 'scheduled_date':scheduled_date, 'completed_date':completed_date})
 
             for instance in records:
                 instance.status = dict(detail_status)[instance.status]
@@ -137,54 +146,54 @@ def MasterDetailView(request, pk):
     return render(request=request, template_name='master-detail.html', context={'master':master, 'master-names':master_names, 'records':records, 'records_name':records_name, 'form':form})
 
 @login_required
-# WorkAxe Logic Views
-def ListWorkAxeView(request):
+# Component Logic Views
+def ListComponentView(request):
     request.session['previous_url'] = request.get_full_path()
 
-    records = WorkAxe.objects.all()
-    records_name = WorkAxe._meta.fields
+    records = Component.objects.all()
+    records_name = Component._meta.fields
 
     return render(request=request, template_name='list.html', context={'records': records, 'records_name': records_name})
 
 @login_required
-def CreateWorkAxeView(request):
+def CreateComponentView(request):
 
     if request.method == 'POST':
-        form = WorkAxeForm(request.POST)
+        form = ComponentForm(request.POST)
 
         if form.is_valid():
-            work_axe = WorkAxe.objects.create()
-            work_axe.name = request.POST['name']
-            work_axe.save()
+            component = Component.objects.create()
+            component.name = request.POST['name']
+            component.save()
 
             return redirect(request.session.get('previous_url', '/'))
     else:
-        form = WorkAxeForm()
+        form = ComponentForm()
 
     return render(request=request, template_name='create.html', context={'form': form, 'previous_url':request.session.get('previous_url', '/')})
 
 @login_required
-def UpdateWorkAxeView(request, pk):
+def UpdateComponentView(request, pk):
 
-    work_axe = WorkAxe.objects.get(id=pk)
+    component = Component.objects.get(id=pk)
     
     if request.method == 'POST':
-        form = WorkAxeForm(request.POST)
+        form = ComponentForm(request.POST)
 
         if form.is_valid():
-            work_axe.name = request.POST['name']
-            work_axe.save()
+            component.name = request.POST['name']
+            component.save()
 
             return redirect(request.session.get('previous_url', '/'))
     else:
-        form = WorkAxeForm(initial={'name':work_axe.name})
+        form = ComponentForm(initial={'name':component.name})
 
     return render(request=request, template_name='update.html', context={'form': form, 'previous_url':request.session.get('previous_url', '/')})
 
 @login_required
-def DeleteWorkAxeView(request, pk):
+def DeleteComponentView(request, pk):
 
-    record = WorkAxe.objects.get(id=pk)
+    record = Component.objects.get(id=pk)
     
     if request.POST:
         record.delete()
@@ -210,8 +219,8 @@ def CreateActivityView(request):
         form = ActivitieForm(request.POST)
 
         if form.is_valid():
-            work_axe = WorkAxe.objects.get(id=request.POST['work_axe'])
-            activity = Activitie.objects.create(work_axe=work_axe, name=request.POST['name'])
+            component = Component.objects.get(id=request.POST['component'])
+            activity = Activitie.objects.create(component=component, name=request.POST['name'])
             
             return redirect(request.session.get('previous_url', '/'))
     else:
@@ -228,15 +237,15 @@ def UpdateActivityView(request, pk):
         form = ActivitieForm(request.POST)
 
         if form.is_valid():
-            work_axe = WorkAxe.objects.get(id=request.POST['work_axe'])
+            component = Component.objects.get(id=request.POST['component'])
 
-            activity.work_axe = work_axe
+            activity.component = component
             activity.name = request.POST['name']
             activity.save()
 
             return redirect(request.session.get('previous_url', '/'))
     else:
-        form = ActivitieForm(initial={'work_axe':activity.work_axe, 'name':activity.name})
+        form = ActivitieForm(initial={'component':activity.component, 'name':activity.name})
 
     return render(request=request, template_name='update.html', context={'form': form, 'previous_url':request.session.get('previous_url', '/')})
 
@@ -435,21 +444,41 @@ def CreateDetailView(request):
         if form.is_valid():
             master_plan = MasterPlan.objects.get(id=request.POST['master_plan'])
             activity = Activitie.objects.get(id=request.POST['activity'])
-            work_axe = WorkAxe.objects.get(id=activity.work_axe.id)
-            responsible = CustomUser.objects.get(id=request.POST['responsible'])
+            component = Component.objects.get(id=activity.component.id)
+            goal_manager = CustomUser.objects.get(id=request.POST['goal_manager'])
+            activity_manager = CustomUser.objects.get(id=request.POST['activity_manager'])
+            supervision_manager = CustomUser.objects.get(id=request.POST['supervision_manager'])
             complete_date = request.POST['completed_date']
+            quantities = request.POST['quantities']
+            unit_cost = request.POST['unit_cost']
+            # total = request.POST['total']
             
             if complete_date == '':
                 complete_date = None
+            if quantities == '':
+                quantities = None
+            if unit_cost == '':
+                unit_cost = None
+            # if total == '':
+            #     total = None
             
             detail = Detail.objects.create(
                 master_plan=master_plan,
-                work_axe=work_axe,
+                component=component,
                 activity=activity,
-                responsible=responsible,
+                goal_manager=goal_manager,
+                activity_manager=activity_manager,
+                supervision_manager=supervision_manager,
+                expected_results=request.POST['expected_results'],
+                objectives=request.POST['objectives'],
+                goal=request.POST['goal'],
+                tasks=request.POST['tasks'],
                 status=request.POST['status'],
                 scheduled_date=request.POST['scheduled_date'],
                 completed_date=complete_date,
+                quantities=quantities,
+                unit_cost=unit_cost,
+                # total=total,
                 evaluation = request.POST['evaluation'],
                 observations = request.POST['observations']
             )
@@ -471,21 +500,41 @@ def CreateMasterDetailView(request, pk):
         if form.is_valid():
             master_plan = MasterPlan.objects.get(id=request.POST['master_plan'])
             activity = Activitie.objects.get(id=request.POST['activity'])
-            work_axe = WorkAxe.objects.get(id=activity.work_axe.id)
-            responsible = CustomUser.objects.get(id=request.POST['responsible'])
+            component = Component.objects.get(id=activity.component.id)
+            goal_manager = CustomUser.objects.get(id=request.POST['goal_manager'])
+            activity_manager = CustomUser.objects.get(id=request.POST['activity_manager'])
+            supervision_manager = CustomUser.objects.get(id=request.POST['supervision_manager'])
             complete_date = request.POST['completed_date']
+            quantities = request.POST['quantities']
+            unit_cost = request.POST['unit_cost']
+            # total = request.POST['total']
             
             if complete_date == '':
                 complete_date = None
+            if quantities == '':
+                quantities = None
+            if unit_cost == '':
+                unit_cost = None
+            # if total == '':
+            #     total = None
             
             detail = Detail.objects.create(
                 master_plan=master_plan,
-                work_axe=work_axe,
+                component=component,
                 activity=activity,
-                responsible=responsible,
+                goal_manager=goal_manager,
+                activity_manager=activity_manager,
+                supervision_manager=supervision_manager,
+                expected_results=request.POST['expected_results'],
+                objectives=request.POST['objectives'],
+                goal=request.POST['goal'],
+                tasks=request.POST['tasks'],
                 status=request.POST['status'],
                 scheduled_date=request.POST['scheduled_date'],
                 completed_date=complete_date,
+                quantities=quantities,
+                unit_cost=unit_cost,
+                # total=total,
                 evaluation = request.POST['evaluation'],
                 observations = request.POST['observations']
             )
@@ -508,20 +557,31 @@ def UpdateDetailView(request, pk):
         if form.is_valid():
             master_plan = MasterPlan.objects.get(id=request.POST['master_plan'])
             activity = Activitie.objects.get(id=request.POST['activity'])
-            work_axe = WorkAxe.objects.get(id=activity.work_axe.id)
-            responsible = CustomUser.objects.get(id=request.POST['responsible'])
+            component = Component.objects.get(id=activity.component.id)
+            goal_manager = CustomUser.objects.get(id=request.POST['goal_manager'])
+            activity_manager = CustomUser.objects.get(id=request.POST['activity_manager'])
+            supervision_manager = CustomUser.objects.get(id=request.POST['supervision_manager'])
             complete_date = request.POST['completed_date']
             
             if complete_date == '':
                 complete_date = None
 
             detail.master_plan=master_plan
-            detail.work_axe=work_axe
+            detail.component=component
             detail.activity=activity
-            detail.responsible=responsible
+            detail.goal_manager=goal_manager
+            detail.activity_manager=activity_manager
+            detail.supervision_manager=supervision_manager
+            detail.expected_results=request.POST['expected_results'],
+            detail.objectives=request.POST['objectives'],
+            detail.goal=request.POST['goal'],
+            detail.tasks=request.POST['tasks'],
             detail.status = request.POST['status']
             detail.scheduled_date = request.POST['scheduled_date']
             detail.completed_date = complete_date
+            detail.quantities=request.POST['quantities'],
+            detail.unit_cost=request.POST['unit_cost'],
+            detail.total=request.POST['total'],
             detail.evaluation = request.POST['evaluation']
             detail.observations = request.POST['observations']
             detail.save()
@@ -535,11 +595,20 @@ def UpdateDetailView(request, pk):
         
         form = DetailForm(initial={
             'master_plan':detail.master_plan,
-            'work_axe':detail.work_axe,
+            'component':detail.component,
             'activity':detail.activity,
-            'responsible':detail.responsible,
+            'goal_manager':detail.goal_manager,
+            'activity_manager':detail.activity_manager,
+            'supervision_manager':detail.supervision_manager,
+            'expected_results':detail.expected_results,
+            'objectives':detail.objectives,
+            'goal':detail.goal,
+            'tasks':detail.tasks,
             'status':detail.status,
             'scheduled_date':detail.scheduled_date.strftime('%Y-%m-%d'),
+            'quantities':detail.quantities,
+            'unit_cost':detail.unit_cost,
+            'total':detail.total,
             'evaluation':detail.evaluation,
             'observations':detail.observations
             })

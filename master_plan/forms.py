@@ -1,6 +1,6 @@
 from django import forms
 from django.forms.widgets import DateInput
-from .models import CustomUser, WorkAxe, Activitie, MasterPlan, master_plan_status, detail_status
+from .models import CustomUser, Component, Activitie, MasterPlan, master_plan_status, detail_status
 
 class SignUpForm(forms.Form):
     
@@ -91,18 +91,18 @@ class LoginForm(forms.Form):
             'invalid': 'El valor ingresado es inválido.',
         })
 
-class WorkAxeForm(forms.Form):
+class ComponentForm(forms.Form):
     name = forms.CharField(
-        label=('Eje de trabajo'),
+        label=('Componente'),
         error_messages={
             'required': 'Este campo es requerido.',
             'invalid': 'El valor ingresado es inválido.',
         })
 
 class ActivitieForm(forms.Form):
-    work_axe = forms.ModelChoiceField(
-        label=('Eje de trabajo'), 
-        queryset=WorkAxe.objects.all(),
+    component = forms.ModelChoiceField(
+        label=('Componente'), 
+        queryset=Component.objects.all(),
         error_messages={
             'required': 'Este campo es requerido.',
             'invalid': 'El valor ingresado es inválido.',
@@ -161,13 +161,60 @@ class DetailForm(forms.Form):
             'required': 'Este campo es requerido.',
             'invalid': 'El valor ingresado es inválido.',
         })
-    responsible = forms.ModelChoiceField(
-        label=('Responsable'), 
+    goal_manager = forms.ModelChoiceField(
+        label=('Gerente de objetivo'), 
         queryset=CustomUser.objects.all(),
+        required=False,
         error_messages={
             'required': 'Este campo es requerido.',
             'invalid': 'El valor ingresado es inválido.',
         })
+    activity_manager = forms.ModelChoiceField(
+        label=('Responsable actividad'), 
+        queryset=CustomUser.objects.all(),
+        required=False,
+        error_messages={
+            'required': 'Este campo es requerido.',
+            'invalid': 'El valor ingresado es inválido.',
+        })
+    supervision_manager = forms.ModelChoiceField(
+        label=('Responsable supervisión'), 
+        queryset=CustomUser.objects.all(),
+        required=False,
+        error_messages={
+            'required': 'Este campo es requerido.',
+            'invalid': 'El valor ingresado es inválido.',
+        })
+    expected_results = forms.CharField(
+        label=('Resultado esperado'), 
+        required=False,
+        error_messages={
+            'required': 'Este campo es requerido.',
+            'invalid': 'El valor ingresado es inválido.',
+    })
+    objectives = forms.CharField(
+        label=('Objectivos'), 
+        widget=forms.Textarea, 
+        required=False,
+        error_messages={
+            'required': 'Este campo es requerido.',
+            'invalid': 'El valor ingresado es inválido.',
+    })
+    goal = forms.CharField(
+        label=('Metas'), 
+        required=False,
+        error_messages={
+            'required': 'Este campo es requerido.',
+            'invalid': 'El valor ingresado es inválido.',
+    })
+    tasks = forms.CharField(
+        label=('Tarea'), 
+        widget=forms.Textarea, 
+        required=False,
+        error_messages={
+            'required': 'Este campo es requerido.',
+            'invalid': 'El valor ingresado es inválido.',
+    })
     status = forms.ChoiceField(
         label='Estado', 
         choices=detail_status,
@@ -190,6 +237,31 @@ class DetailForm(forms.Form):
             'required': 'Este campo es requerido.',
             'invalid': 'El valor ingresado es inválido.',
         })
+    quantities = forms.IntegerField(
+        label='Cantidades',
+        required=False,
+        error_messages={
+            'required': 'Este campo es requerido.',
+            'invalid': 'El valor ingresado es inválido.',
+    })
+    unit_cost = forms.DecimalField(
+        max_digits=10, 
+        decimal_places=2,
+        label='Costo Unitario', 
+        required=False,
+        error_messages={
+            'required': 'Este campo es requerido.',
+            'invalid': 'El valor ingresado es inválido.',
+    })
+    # total = forms.DecimalField(
+    #     max_digits=10, 
+    #     decimal_places=2, 
+    #     label='Total',
+    #     required=False, 
+    #     error_messages={
+    #         'required': 'Este campo es requerido.',
+    #         'invalid': 'El valor ingresado es inválido.',
+    # })
     evaluation = forms.CharField(
         label=('Evaluación'), 
         widget=forms.Textarea, 
@@ -209,9 +281,9 @@ class DetailForm(forms.Form):
 
 class FilterForm(forms.Form):
 
-    work_axe = forms.ModelChoiceField(
-        label=('Eje de trabajo'), 
-        queryset=WorkAxe.objects.all(),
+    component = forms.ModelChoiceField(
+        label=('Componente'),
+        queryset=Component.objects.all(),
         required=False,
         error_messages={
             'required': 'Este campo es requerido.',
