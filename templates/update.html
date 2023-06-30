@@ -135,7 +135,7 @@
                         {% for error in field.errors %}
                             <p class="text-danger mt-3">{{ error }}</p>
                         {% endfor %}
-                    {% elif field.field.widget.input_type == 'text' %}
+                    {% elif field.field.widget.input_type == 'text' or field.field.widget.input_type == 'number' %}
                         <label for="{{ field.name }}">{{ field.label_tag }}</label>
                         <input
                             type="text"

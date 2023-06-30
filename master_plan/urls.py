@@ -24,10 +24,10 @@ urlpatterns = [
     path('login/', views.LoginView, name='login'),
     path('logout/', views.LogoutView, name='log-out'),
 
-    path('work/axe/', views.ListWorkAxeView, name='work-axe'),
-    path('work/axe/create/', views.CreateWorkAxeView, name='work-axe-create'),
-    path('work/axe/update/<int:pk>/', views.UpdateWorkAxeView, name='work-axe-update'),
-    path('work/axe/delete/<int:pk>/', views.DeleteWorkAxeView, name='work-axe-delete'),
+    path('work/axe/', views.ListComponentView, name='work-axe'),
+    path('work/axe/create/', views.CreateComponentView, name='work-axe-create'),
+    path('work/axe/update/<int:pk>/', views.UpdateComponentView, name='work-axe-update'),
+    path('work/axe/delete/<int:pk>/', views.DeleteComponentView, name='work-axe-delete'),
 
     path('responsible/', views.ListResponsibleView, name='responsible'),
     path('responsible/create/', views.CreateResponsibleView, name='responsible-create'),
