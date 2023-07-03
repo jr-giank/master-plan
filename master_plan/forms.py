@@ -1,6 +1,12 @@
 from django import forms
 from django.forms.widgets import DateInput
-from .models import CustomUser, Component, Activitie, MasterPlan, master_plan_status, detail_status
+from .models import CustomUser, Component, Activitie, MasterPlan, master_plan_status
+
+detail_status = [
+    ('N', None),
+    ('A', 'No Completado'),
+    ('B', 'Completado')
+]
 
 class SignUpForm(forms.Form):
     
@@ -97,6 +103,7 @@ class ComponentForm(forms.Form):
         error_messages={
             'required': 'Este campo es requerido.',
             'invalid': 'El valor ingresado es inválido.',
+            'unique': 'Este componente ya existe.'
         })
 
 class ActivitieForm(forms.Form):
@@ -113,6 +120,7 @@ class ActivitieForm(forms.Form):
         error_messages={
             'required': 'Este campo es requerido.',
             'invalid': 'El valor ingresado es inválido.',
+            'unique': 'Esta actividad ya existe.'
         })
 
 class MasterPlanForm(forms.Form):
@@ -121,6 +129,7 @@ class MasterPlanForm(forms.Form):
         error_messages={
             'required': 'Este campo es requerido.',
             'invalid': 'El valor ingresado es inválido.',
+            'unique': 'Este master plan ya existe.'
         })
     description = forms.CharField(
         label='Descripción', 
@@ -253,15 +262,6 @@ class DetailForm(forms.Form):
             'required': 'Este campo es requerido.',
             'invalid': 'El valor ingresado es inválido.',
     })
-    # total = forms.DecimalField(
-    #     max_digits=10, 
-    #     decimal_places=2, 
-    #     label='Total',
-    #     required=False, 
-    #     error_messages={
-    #         'required': 'Este campo es requerido.',
-    #         'invalid': 'El valor ingresado es inválido.',
-    # })
     evaluation = forms.CharField(
         label=('Evaluación'), 
         widget=forms.Textarea, 

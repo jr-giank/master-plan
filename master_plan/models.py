@@ -27,7 +27,7 @@ class CustomUser(AbstractUser):
     role = models.CharField(max_length=5, choices=user_roles, default='A', verbose_name='Rol')
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['first_name', 'last_name', 'password', 'role']
+    REQUIRED_FIELDS = ['first_name', 'last_name', 'password', 'role', 'username']
 
     def __str__(self):
         return f'{self.first_name} {self.last_name}'
@@ -36,7 +36,7 @@ class Component(models.Model):
 
     """ Work axes model for the task """
 
-    name = models.CharField(max_length=75, null=False, blank=False, verbose_name='Nombre')
+    name = models.CharField(max_length=75, null=False, blank=False, unique=True, verbose_name='Nombre')
 
     def __str__(self):
         return self.name
@@ -46,7 +46,7 @@ class Activitie(models.Model):
     """ Activity model for the task """
 
     component = models.ForeignKey(to=Component, null=True, blank=True, on_delete=models.SET_NULL, verbose_name='Componente')
-    name = models.TextField(null=False, blank=False, verbose_name='Nombre')
+    name = models.TextField(null=False, blank=False, unique=True, verbose_name='Nombre')
     
     def __str__(self):
         return self.name
@@ -55,7 +55,7 @@ class MasterPlan(models.Model):
 
     """ Master plan model for a project """
 
-    name = models.CharField(max_length=75, null=False, blank=False, verbose_name='Nombre')
+    name = models.CharField(max_length=75, null=False, blank=False, unique=True, verbose_name='Nombre')
     description = models.TextField(null=True, blank=True, verbose_name='Descripción')
     date_created = models.DateField(auto_now_add=True, verbose_name='Fecha creación')
     status = models.CharField(max_length=7, choices=master_plan_status, default='A', verbose_name='Estado')
@@ -94,6 +94,6 @@ class Detail(models.Model):
     def save(self, *args, **kwargs):
         
         if self.quantities != None and self.unit_cost != None:
-            self.total = int(self.quantities) * int(self.unit_cost)
+            self.total = int(self.quantities) * int(float(self.unit_cost))
         
         super(Detail, self).save(*args, **kwargs)
