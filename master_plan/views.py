@@ -112,24 +112,21 @@ def MasterDetailView(request, pk):
                 Q(activity_manager=request.user.id) |
                 Q(supervision_manager=request.user.id),
                 master_plan=master.id)
-            
-        print('records intervenidos: ', records)
-        
+                    
         if form.is_valid():
             action = request.POST.get('action')
-            print('\n\nSstatus:', form.cleaned_data['status'])
             
             if action == 'search':
                 # Filters
-                component = request.POST['component']
-                activity = request.POST['activity']
-                responsible = request.POST['responsible']
-                status = request.POST['status']
-                scheduled_date = request.POST['scheduled_date']
-                completed_date = request.POST['completed_date']
-                
-                print('\n\nrecords en busquedad: ', records)
+                component = form.cleaned_data['component']
+                activity = form.cleaned_data['activity']
+                responsible = form.cleaned_data['responsible']
+                status = form.cleaned_data['status']
+                scheduled_date = form.cleaned_data['scheduled_date']
+                completed_date = form.cleaned_data['completed_date']
 
+                form = FilterForm(initial={'component':component, 'activity':activity, 'responsible':responsible, 'status':status, 'scheduled_date':scheduled_date, 'completed_date':completed_date})
+                
                 if component:
                     records = records.filter(component=component)
                 if activity:
@@ -145,13 +142,6 @@ def MasterDetailView(request, pk):
                     records = records.filter(scheduled_date=scheduled_date)
                 if completed_date:
                     records = records.filter(completed_date=completed_date)
-
-                print('\n\nrecords buscados: ', records)
-
-                if 'status' not in form.cleaned_data:
-                    del form.cleaned_data['status']
-
-                form = FilterForm(initial={'component':component, 'activity':activity, 'responsible':responsible, 'status':status, 'scheduled_date':scheduled_date, 'completed_date':completed_date})
 
             for instance in records:
                 instance.status = dict(detail_status)[instance.status]

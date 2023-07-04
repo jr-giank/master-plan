@@ -1,12 +1,6 @@
 from django import forms
 from django.forms.widgets import DateInput
-from .models import CustomUser, Component, Activitie, MasterPlan, master_plan_status
-
-detail_status = [
-    ('N', None),
-    ('A', 'No Completado'),
-    ('B', 'Completado')
-]
+from .models import CustomUser, Component, Activitie, MasterPlan, master_plan_status, detail_status
 
 class SignUpForm(forms.Form):
     
