@@ -204,14 +204,14 @@ class DetailForm(forms.Form):
             'invalid': 'El valor ingresado es inválido.',
     })
     goal = forms.CharField(
-        label=('Metas'), 
+        label=('Meta'), 
         required=False,
         error_messages={
             'required': 'Este campo es requerido.',
             'invalid': 'El valor ingresado es inválido.',
     })
     tasks = forms.CharField(
-        label=('Tarea'), 
+        label=('Tareas'), 
         widget=forms.Textarea, 
         required=False,
         error_messages={

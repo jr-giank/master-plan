@@ -77,7 +77,17 @@ def MasterDetailView(request, pk):
         master_names = MasterPlan._meta.fields
 
         # Normal
-        excluded_fields = ['master_plan']
+        excluded_fields = [
+            'master_plan', 
+            'expected_results', 
+            'objectives', 
+            'goal', 
+            'tasks', 
+            'quantities', 
+            'unit_cost',
+            'total',
+            'evaluation',
+            'observations']
 
         records_name = [field for field in Detail._meta.fields if field.name not in excluded_fields]
         
@@ -100,7 +110,17 @@ def MasterDetailView(request, pk):
         master_names = MasterPlan._meta.fields
 
         # Normal
-        excluded_fields = ['master_plan']
+        excluded_fields = [
+            'master_plan', 
+            'expected_results', 
+            'objectives', 
+            'goal', 
+            'tasks', 
+            'quantities', 
+            'unit_cost',
+            'total',
+            'evaluation',
+            'observations']
 
         records_name = [field for field in Detail._meta.fields if field.name not in excluded_fields]
         
@@ -459,6 +479,21 @@ def ListDetailView(request):
         instance.status = dict(detail_status)[instance.status]
 
     return render(request=request, template_name='list.html', context={'records': records, 'records_name': records_name})
+
+@login_required
+def DetailInfoView(request, pk):
+
+    if request.method == 'GET':
+
+        # Normal
+        excluded_fields = ['master_plan']
+
+        records_name = [field for field in Detail._meta.fields if field.name not in excluded_fields]
+        record = Detail.objects.get(id=pk)
+
+        record.status = dict(detail_status)[record.status]
+    
+    return render(request=request, template_name='detail.html', context={'record':record, 'records_name':records_name, 'previous_url':request.session.get('previous_url', '/')})
 
 @login_required
 def CreateDetailView(request):
