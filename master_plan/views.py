@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.decorators import login_required
+from django.db import IntegrityError
 from django.db.models import Q
 
 from .forms import SignUpForm, SignUpUpdateForm, LoginForm, ComponentForm, ActivitieForm, MasterPlanForm, DetailForm, FilterForm
@@ -45,8 +46,8 @@ def LoginView(request):
         
         if form.is_valid():
             
-            email = form.cleaned_data['email']
-            password = form.cleaned_data['password']
+            email = request.POST['email']
+            password = request.POST['password']
             user = authenticate(request, username=email, password=password)
             
             if user is not None:
@@ -111,7 +112,7 @@ def MasterDetailView(request, pk):
                 Q(activity_manager=request.user.id) |
                 Q(supervision_manager=request.user.id),
                 master_plan=master.id)
-        
+                    
         if form.is_valid():
             action = request.POST.get('action')
             
@@ -124,12 +125,17 @@ def MasterDetailView(request, pk):
                 scheduled_date = form.cleaned_data['scheduled_date']
                 completed_date = form.cleaned_data['completed_date']
 
+                form = FilterForm(initial={'component':component, 'activity':activity, 'responsible':responsible, 'status':status, 'scheduled_date':scheduled_date, 'completed_date':completed_date})
+                
                 if component:
                     records = records.filter(component=component)
                 if activity:
                     records = records.filter(activity=activity)
                 if responsible:
-                    records = records.filter(responsible=responsible)
+                    records = records.filter(
+                        Q(goal_manager=responsible) |
+                        Q(activity_manager=responsible) |
+                        Q(supervision_manager=responsible))
                 if status:
                     records = records.filter(status=status)
                 if scheduled_date:
@@ -137,16 +143,14 @@ def MasterDetailView(request, pk):
                 if completed_date:
                     records = records.filter(completed_date=completed_date)
 
-                form = FilterForm(initial={'component':component, 'activity':activity, 'responsible':responsible, 'status':status, 'scheduled_date':scheduled_date, 'completed_date':completed_date})
-
             for instance in records:
                 instance.status = dict(detail_status)[instance.status]
 
             return render(request=request, template_name='master-detail.html', context={'master':master, 'master-names':master_names, 'records':records, 'records_name':records_name, 'form':form}) 
     return render(request=request, template_name='master-detail.html', context={'master':master, 'master-names':master_names, 'records':records, 'records_name':records_name, 'form':form})
 
-@login_required
 # Component Logic Views
+@login_required
 def ListComponentView(request):
     request.session['previous_url'] = request.get_full_path()
 
@@ -162,11 +166,12 @@ def CreateComponentView(request):
         form = ComponentForm(request.POST)
 
         if form.is_valid():
-            component = Component.objects.create()
-            component.name = request.POST['name']
-            component.save()
-
-            return redirect(request.session.get('previous_url', '/'))
+            try:
+                component = Component.objects.create(name=request.POST['name'])
+                
+                return redirect(request.session.get('previous_url', '/'))
+            except IntegrityError:
+                form.add_error('name', 'El componente ya existe.')
     else:
         form = ComponentForm()
 
@@ -181,10 +186,14 @@ def UpdateComponentView(request, pk):
         form = ComponentForm(request.POST)
 
         if form.is_valid():
-            component.name = request.POST['name']
-            component.save()
-
-            return redirect(request.session.get('previous_url', '/'))
+            try:
+                component.unique_error_message
+                component.name = request.POST['name']
+                component.save()
+                
+                return redirect(request.session.get('previous_url', '/'))
+            except IntegrityError:
+                form.add_error('name', 'El componente ya existe.')
     else:
         form = ComponentForm(initial={'name':component.name})
 
@@ -219,10 +228,13 @@ def CreateActivityView(request):
         form = ActivitieForm(request.POST)
 
         if form.is_valid():
-            component = Component.objects.get(id=request.POST['component'])
-            activity = Activitie.objects.create(component=component, name=request.POST['name'])
+            try:
+                component = Component.objects.get(id=request.POST['component'])
+                activity = Activitie.objects.create(component=component, name=request.POST['name'])
             
-            return redirect(request.session.get('previous_url', '/'))
+                return redirect(request.session.get('previous_url', '/'))
+            except IntegrityError:
+                form.add_error('name', 'La actividad ya existe.')
     else:
         form = ActivitieForm()
 
@@ -237,13 +249,16 @@ def UpdateActivityView(request, pk):
         form = ActivitieForm(request.POST)
 
         if form.is_valid():
-            component = Component.objects.get(id=request.POST['component'])
+            try:
+                component = Component.objects.get(id=request.POST['component'])
 
-            activity.component = component
-            activity.name = request.POST['name']
-            activity.save()
+                activity.component = component
+                activity.name = request.POST['name']
+                activity.save()
 
-            return redirect(request.session.get('previous_url', '/'))
+                return redirect(request.session.get('previous_url', '/'))
+            except IntegrityError:
+                form.add_error('name', 'La actividad ya existe.')
     else:
         form = ActivitieForm(initial={'component':activity.component, 'name':activity.name})
 
@@ -284,6 +299,7 @@ def CreateResponsibleView(request):
     
         password = request.POST['password']
         password_confirmation = request.POST['password_confirmation']
+        email = request.POST['email']
 
         if form.is_valid():
             if password != password_confirmation:
@@ -291,15 +307,18 @@ def CreateResponsibleView(request):
                 
                 return render(request=request, template_name='create.html', context={'form': form})
 
-            responsible = CustomUser.objects.create()
-            responsible.first_name = request.POST['first_name']
-            responsible.last_name = request.POST['last_name']
-            responsible.email = request.POST['email']
-            responsible.role = 'B'
-            responsible.password = make_password(password)
-            responsible.save()
+            if CustomUser.objects.filter(email=email).exists():
+                form.add_error('email', 'El correo electronico ya esta en uso')
+            else:
+                responsible = CustomUser.objects.create()
+                responsible.first_name = request.POST['first_name']
+                responsible.last_name = request.POST['last_name']
+                responsible.email = request.POST['email']
+                responsible.role = 'B'
+                responsible.password = make_password(password)
+                responsible.save()
 
-            return redirect(request.session.get('previous_url', '/'))
+                return redirect(request.session.get('previous_url', '/'))
     else:
         form = SignUpForm()
 
@@ -372,13 +391,16 @@ def CreateMasterPlanView(request):
         form = MasterPlanForm(request.POST)
 
         if form.is_valid():
-            master_plan = MasterPlan.objects.create()
-            master_plan.name = request.POST['name']
-            master_plan.description = request.POST['description']
-            master_plan.notes = request.POST['notes']
-            master_plan.save()
+            try:
+                master_plan = MasterPlan.objects.create()
+                master_plan.name = request.POST['name']
+                master_plan.description = request.POST['description']
+                master_plan.notes = request.POST['notes']
+                master_plan.save()
 
-            return redirect(request.session.get('previous_url', '/'))
+                return redirect(request.session.get('previous_url', '/'))
+            except IntegrityError:
+                form.add_error('name', 'El master plan ya existe.')
     else:
         form = MasterPlanForm()
 
@@ -393,13 +415,16 @@ def UpdateMasterPlanView(request, pk):
         form = MasterPlanForm(request.POST)
 
         if form.is_valid():
-            master_plan.name = request.POST['name']
-            master_plan.description = request.POST['description']
-            master_plan.status = request.POST['status']
-            master_plan.notes = request.POST['notes']
-            master_plan.save()
+            try:
+                master_plan.name = request.POST['name']
+                master_plan.description = request.POST['description']
+                master_plan.status = request.POST['status']
+                master_plan.notes = request.POST['notes']
+                master_plan.save()
 
-            return redirect(request.session.get('previous_url', '/'))
+                return redirect(request.session.get('previous_url', '/'))
+            except IntegrityError:
+                form.add_error('name', 'El master plan ya existe.')
     else:
         form = MasterPlanForm(initial={
             'name':master_plan.name,
@@ -451,7 +476,6 @@ def CreateDetailView(request):
             complete_date = request.POST['completed_date']
             quantities = request.POST['quantities']
             unit_cost = request.POST['unit_cost']
-            # total = request.POST['total']
             
             if complete_date == '':
                 complete_date = None
@@ -459,8 +483,6 @@ def CreateDetailView(request):
                 quantities = None
             if unit_cost == '':
                 unit_cost = None
-            # if total == '':
-            #     total = None
             
             detail = Detail.objects.create(
                 master_plan=master_plan,
@@ -478,7 +500,6 @@ def CreateDetailView(request):
                 completed_date=complete_date,
                 quantities=quantities,
                 unit_cost=unit_cost,
-                # total=total,
                 evaluation = request.POST['evaluation'],
                 observations = request.POST['observations']
             )
@@ -507,16 +528,19 @@ def CreateMasterDetailView(request, pk):
             complete_date = request.POST['completed_date']
             quantities = request.POST['quantities']
             unit_cost = request.POST['unit_cost']
-            # total = request.POST['total']
             
+            if goal_manager == '':
+                complete_date = None
+            if activity_manager == '':
+                quantities = None
+            if supervision_manager == '':
+                unit_cost = None
             if complete_date == '':
                 complete_date = None
             if quantities == '':
                 quantities = None
             if unit_cost == '':
                 unit_cost = None
-            # if total == '':
-            #     total = None
             
             detail = Detail.objects.create(
                 master_plan=master_plan,
@@ -534,7 +558,6 @@ def CreateMasterDetailView(request, pk):
                 completed_date=complete_date,
                 quantities=quantities,
                 unit_cost=unit_cost,
-                # total=total,
                 evaluation = request.POST['evaluation'],
                 observations = request.POST['observations']
             )
@@ -561,10 +584,16 @@ def UpdateDetailView(request, pk):
             goal_manager = CustomUser.objects.get(id=request.POST['goal_manager'])
             activity_manager = CustomUser.objects.get(id=request.POST['activity_manager'])
             supervision_manager = CustomUser.objects.get(id=request.POST['supervision_manager'])
-            complete_date = request.POST['completed_date']
+            completed_date = request.POST['completed_date']
+            quantities = request.POST['quantities']
+            unit_cost = request.POST['unit_cost']
             
-            if complete_date == '':
-                complete_date = None
+            if completed_date == '':
+                completed_date = None
+            if quantities == '':
+                quantities = None
+            if unit_cost == '':
+                unit_cost = None
 
             detail.master_plan=master_plan
             detail.component=component
@@ -572,16 +601,15 @@ def UpdateDetailView(request, pk):
             detail.goal_manager=goal_manager
             detail.activity_manager=activity_manager
             detail.supervision_manager=supervision_manager
-            detail.expected_results=request.POST['expected_results'],
-            detail.objectives=request.POST['objectives'],
-            detail.goal=request.POST['goal'],
-            detail.tasks=request.POST['tasks'],
+            detail.expected_results=request.POST['expected_results']
+            detail.objectives=request.POST['objectives']
+            detail.goal=request.POST['goal']
+            detail.tasks=request.POST['tasks']
             detail.status = request.POST['status']
             detail.scheduled_date = request.POST['scheduled_date']
-            detail.completed_date = complete_date
-            detail.quantities=request.POST['quantities'],
-            detail.unit_cost=request.POST['unit_cost'],
-            detail.total=request.POST['total'],
+            detail.completed_date = completed_date
+            detail.quantities=quantities
+            detail.unit_cost=unit_cost
             detail.evaluation = request.POST['evaluation']
             detail.observations = request.POST['observations']
             detail.save()
@@ -589,9 +617,9 @@ def UpdateDetailView(request, pk):
             return redirect(request.session.get('previous_url', '/'))
     else:
         try:
-            complete_date = detail.completed_date.strftime('%Y-%m-%d'),
+            completed_date = detail.completed_date.strftime('%Y-%m-%d')
         except AttributeError:
-            complete_date = datetime.datetime.now().strftime('%Y-%m-%d')
+            completed_date = None
         
         form = DetailForm(initial={
             'master_plan':detail.master_plan,
@@ -606,9 +634,9 @@ def UpdateDetailView(request, pk):
             'tasks':detail.tasks,
             'status':detail.status,
             'scheduled_date':detail.scheduled_date.strftime('%Y-%m-%d'),
+            'completed_date':completed_date,
             'quantities':detail.quantities,
             'unit_cost':detail.unit_cost,
-            'total':detail.total,
             'evaluation':detail.evaluation,
             'observations':detail.observations
             })

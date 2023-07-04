@@ -194,10 +194,16 @@
     <script>
         async function exportTableToExcel() {
             // Tabla HTML
-            var tablaHTML = document.getElementById('tabla'); // Reemplaza 'miTabla' con el ID de tu tabla
+            var tablaHTML = document.getElementById('tabla');
             
             var excel = new ExcelJS.Workbook();
             var hoja = excel.addWorksheet('Master Data');
+
+            var sombreado = {
+                type: 'pattern',
+                pattern: 'solid',
+                fgColor: { argb: '52b788' } 
+            };
 
             // Titulo de las columnas
             var filasHTML = tablaHTML.getElementsByTagName('tr');
@@ -208,7 +214,9 @@
                     var valorCelda = celdasHTML[j].innerText;
                     
                     if(valorCelda != 'Acciones'){
-                        hoja.getCell(String.fromCharCode(65 + j) + (i + 1)).value = valorCelda;   
+                        var celda = hoja.getCell(String.fromCharCode(65 + j) + (i + 1)).value = valorCelda;   
+                        celda.value = valorCelda;
+                        celda.fill = sombreado
                     }          
                 }
             }

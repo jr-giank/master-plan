@@ -97,6 +97,7 @@ class ComponentForm(forms.Form):
         error_messages={
             'required': 'Este campo es requerido.',
             'invalid': 'El valor ingresado es inválido.',
+            'unique': 'Este componente ya existe.'
         })
 
 class ActivitieForm(forms.Form):
@@ -113,6 +114,7 @@ class ActivitieForm(forms.Form):
         error_messages={
             'required': 'Este campo es requerido.',
             'invalid': 'El valor ingresado es inválido.',
+            'unique': 'Esta actividad ya existe.'
         })
 
 class MasterPlanForm(forms.Form):
@@ -121,6 +123,7 @@ class MasterPlanForm(forms.Form):
         error_messages={
             'required': 'Este campo es requerido.',
             'invalid': 'El valor ingresado es inválido.',
+            'unique': 'Este master plan ya existe.'
         })
     description = forms.CharField(
         label='Descripción', 
@@ -253,15 +256,6 @@ class DetailForm(forms.Form):
             'required': 'Este campo es requerido.',
             'invalid': 'El valor ingresado es inválido.',
     })
-    # total = forms.DecimalField(
-    #     max_digits=10, 
-    #     decimal_places=2, 
-    #     label='Total',
-    #     required=False, 
-    #     error_messages={
-    #         'required': 'Este campo es requerido.',
-    #         'invalid': 'El valor ingresado es inválido.',
-    # })
     evaluation = forms.CharField(
         label=('Evaluación'), 
         widget=forms.Textarea, 
