@@ -14,6 +14,9 @@ from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill
 import datetime
 
+# Global variables
+filter_records = None 
+
 # Authentication
 def SignUpView(request):
     
@@ -71,6 +74,9 @@ def LogoutView(request):
 # Main views
 @login_required
 def MasterDetailView(request, pk):
+
+    global filter_records
+
     request.session['previous_url'] = request.get_full_path()
 
     if request.method == 'GET':
@@ -166,6 +172,10 @@ def MasterDetailView(request, pk):
                 if completed_date:
                     records = records.filter(completed_date=completed_date)
 
+                filter_records = records
+            else:
+                filter_records = None
+
             for instance in records:
                 instance.status = dict(detail_status)[instance.status]
 
@@ -175,7 +185,6 @@ def MasterDetailView(request, pk):
 def print_to_excel(request, pk):
     
     records = Detail.objects.filter(master_plan=pk)
-    records_name = MasterPlan._meta.fields
 
     for instance in records:
         instance.status = dict(detail_status)[instance.status]
@@ -248,6 +257,87 @@ def print_to_excel(request, pk):
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
     response['Content-Disposition'] = 'attachment; filename=Master Plan.xlsx'
     workbook.save(response)
+
+    return response
+
+def PrintFilterToExcelView(request):
+
+    global filter_records
+    
+    workbook = Workbook()
+    sheet = workbook.active
+
+    row_number = 2
+    header_style = Font(name='Times New Roman', size=13, bold=True)
+    row_style = Font(name='Times New Roman', size=12)
+    background_color = PatternFill(start_color="52b788", end_color="52b788", fill_type="solid")
+
+    header_row = [
+        'ID', 
+        'Componente',
+        'Actividad',
+        'Gerente de objetivo',
+        'Responsable actividad',
+        'Responsable supervisión',
+        'Resultados esperados',
+        'Objetivos',
+        'Meta',
+        'Tareas',
+        'Estado',
+        'Fecha programada', 'Fecha completada', 'Cantidades', 'Costo de unidad', 'Monto total', 'Evaluación', 'Observaciones'
+    ]
+    
+    for column, header_cell in enumerate(header_row, start=1):
+        cell = sheet.cell(row=1, column=column)
+        cell.font = header_style
+        cell.value = header_cell
+    
+    if filter_records != None:
+        for record in filter_records:
+
+            value_row = [
+            str(record.id), 
+            str(record.component),
+            str(record.activity),
+            str(record.goal_manager),
+            str(record.activity_manager),
+            str(record.supervision_manager),
+            str(record.expected_results),
+            str(record.objectives),
+            str(record.goal),
+            str(record.tasks),
+            str(record.status),
+            str(record.scheduled_date),
+            str(record.completed_date),
+            str(record.quantities),
+            str(record.unit_cost),
+            str(record.total),
+            str(record.evaluation),
+            str(record.observations)
+            ]
+
+            if str(record.status) == 'Completado':
+                for column, value_cell in enumerate(value_row, start=1):
+                    cell = sheet.cell(row=row_number, column=column)
+                    cell.font = row_style
+                    cell.fill = background_color
+                    cell.value = value_cell
+            else:
+                for column, value_cell in enumerate(value_row, start=1):
+                    cell = sheet.cell(row=row_number, column=column)
+                    cell.font = row_style
+                    cell.value = value_cell
+            
+            row_number += 1
+
+        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        response['Content-Disposition'] = 'attachment; filename=Master Plan.xlsx'
+        workbook.save(response)
+    else:
+        message = "Debes de filtrar la información antes de imprimir un filtro"
+        script = f"<script>alert('{message}'); window.location.href = document.referrer;</script>"
+
+        return HttpResponse(script)
 
     return response
 

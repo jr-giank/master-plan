@@ -55,8 +55,8 @@
                 {% if request.user.role == 'A' %}
                     <a href="{% url 'master-detail-create' master.id %}" class="page-link border-0 bg-info text-white d-inline-block py-1 px-2 btn">Agregar</a></button>
                 {% endif %}
-                <a href="{% url 'print_to_excel' master.id %}" class="page-link border-0 bg-secondary text-white d-inline-block py-1 px-2 btn">Imprimir</a></button>
-                <a class="page-link border-0 bg-secondary text-white d-inline-block py-1 px-2 btn" onclick="exportTableToExcel()">Imprimir Filtrado</a></button>
+                <a href="{% url 'print-excel' master.id %}" class="page-link border-0 bg-secondary text-white d-inline-block py-1 px-2 btn">Imprimir</a></button>
+                <a href="{% url 'print-filter-excel' %}" class="page-link border-0 bg-secondary text-white d-inline-block py-1 px-2 btn">Imprimir Filtrado</a></button>
             </div>
         </div>
         <div class="row">
@@ -198,62 +198,6 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    
-    <script src="https://unpkg.com/exceljs/dist/exceljs.min.js"></script>
-    <script>
-        async function exportTableToExcel() {
-            // Tabla HTML
-            var tablaHTML = document.getElementById('tabla');
-            
-            var excel = new ExcelJS.Workbook();
-            var hoja = excel.addWorksheet('Master Data');
-
-            var sombreado = {
-                type: 'pattern',
-                pattern: 'solid',
-                fgColor: { argb: '52b788' } 
-            };
-
-            // Titulo de las columnas
-            var filasHTML = tablaHTML.getElementsByTagName('tr');
-            for (var i = 0; i < filasHTML.length; i++) {
-                var celdasHTML = filasHTML[i].getElementsByTagName('th');
-                
-                for (var j = 0; j < celdasHTML.length; j++) {
-                    var valorCelda = celdasHTML[j].innerText;
-                    
-                    if(valorCelda != 'Acciones'){
-                        var celda = hoja.getCell(String.fromCharCode(65 + j) + (i + 1)).value = valorCelda;   
-                        celda.value = valorCelda;
-                        celda.fill = sombreado
-                    }          
-                }
-            }
-            
-            // Valores de las columnas
-            var filasHTML = tablaHTML.getElementsByTagName('tr');
-            for (var i = 0; i < filasHTML.length; i++) {
-                var celdasHTML = filasHTML[i].getElementsByTagName('td');
-
-                for (var j = 0; j < celdasHTML.length; j++) {
-                    var valorCelda = celdasHTML[j].innerText;
-
-                    if(valorCelda != 'Modificar Eliminar Ver'){
-                        hoja.getCell(String.fromCharCode(65 + j) + (i + 1)).value = valorCelda;
-                    }
-                }
-            }
-
-            var buffer = await excel.xlsx.writeBuffer();
-            var blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-            var url = window.URL.createObjectURL(blob);
-            var link = document.createElement('a');
-            link.href = url;
-            link.download = 'Plan-Maestro.xlsx';
-            link.click();
-            window.URL.revokeObjectURL(url);
-        }
-    </script>
 
 </body>
 
