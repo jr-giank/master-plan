@@ -12,7 +12,6 @@ from .models import CustomUser, Component, Activitie, MasterPlan, Detail, master
 from .functions import is_admin 
 from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill
-import datetime
 
 # Global variables
 filter_records = None 
@@ -165,7 +164,7 @@ def MasterDetailView(request, pk):
                         Q(goal_manager=responsible) |
                         Q(activity_manager=responsible) |
                         Q(supervision_manager=responsible))
-                if status:
+                if status != 'C':
                     records = records.filter(status=status)
                 if scheduled_date:
                     records = records.filter(scheduled_date=scheduled_date)
@@ -645,7 +644,21 @@ def ListDetailView(request):
     request.session['previous_url'] = request.get_full_path()
 
     records = Detail.objects.all()
-    records_name = Detail._meta.fields
+
+    excluded_fields = [
+        'master_plan', 
+        'expected_results', 
+        'objectives', 
+        'goal', 
+        'tasks', 
+        'quantities', 
+        'unit_cost',
+        'total',
+        'evaluation',
+        'observations'
+    ]
+
+    records_name = [field for field in Detail._meta.fields if field.name not in excluded_fields]
 
     for instance in records:
         instance.status = dict(detail_status)[instance.status]

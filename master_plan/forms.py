@@ -2,6 +2,12 @@ from django import forms
 from django.forms.widgets import DateInput
 from .models import CustomUser, Component, Activitie, MasterPlan, master_plan_status, detail_status
 
+detail_status = [
+    ('C', '-------------'),
+    ('A', 'No Completado'),
+    ('B', 'Completado')
+]
+
 class SignUpForm(forms.Form):
     
     first_name = forms.CharField(

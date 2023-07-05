@@ -171,17 +171,13 @@
                             <td class="col text-center" id="bg-complete">
                                 <a href='{{ request.scheme }}://{{ request.META.HTTP_HOST }}/detail/update/{{record.pk}}/' class="page-link border-0 bg-success text-white d-inline-block p-1 mx-2 mb-1 btn">Modificar</a>
                                 <a href='{{ request.scheme }}://{{ request.META.HTTP_HOST }}/detail/delete/{{record.pk}}/' class="page-link border-0 bg-danger text-white d-inline-block p-1 mx-2 mb-1 btn">Eliminar</a>
-                                {% if 'master/plan/details' in request.path %}
-                                    <a href='{{ request.scheme }}://{{ request.get_host }}/detail/info/{{record.pk}}/' class="page-link border-0 bg-warning text-white d-inline-block py-1 px-2 mx-2 mb-1 btn">Ver</a></button>
-                                {% endif %}
+                                <a href='{{ request.scheme }}://{{ request.get_host }}/detail/info/{{record.pk}}/' class="page-link border-0 bg-warning text-white d-inline-block py-1 px-2 mx-2 mb-1 btn">Ver</a></button>
                             </td>
                         {% else %}
                             <td class="col text-center">
                                 <a href='{{ request.scheme }}://{{ request.META.HTTP_HOST }}/detail/update/{{record.pk}}/' class="page-link border-0 bg-success text-white d-inline-block p-1 mx-2 mb-1 btn">Modificar</a>
                                 <a href='{{ request.scheme }}://{{ request.META.HTTP_HOST }}/detail/delete/{{record.pk}}/' class="page-link border-0 bg-danger text-white d-inline-block p-1 mx-2 mb-1 btn">Eliminar</a>
-                                {% if 'master/plan/details' in request.path %}
-                                    <a href='{{ request.scheme }}://{{ request.get_host }}/detail/info/{{record.pk}}/' class="page-link border-0 bg-warning text-white d-inline-block py-1 px-2 mx-2 mb-1 btn">Ver</a></button>
-                                {% endif %}
+                                <a href='{{ request.scheme }}://{{ request.get_host }}/detail/info/{{record.pk}}/' class="page-link border-0 bg-warning text-white d-inline-block py-1 px-2 mx-2 mb-1 btn">Ver</a></button>
                             </td>
                         {% endif %} 
                             <!-- </tr> -->
