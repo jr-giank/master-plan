@@ -181,7 +181,7 @@ def MasterDetailView(request, pk):
             return render(request=request, template_name='master-detail.html', context={'master':master, 'master-names':master_names, 'records':records, 'records_name':records_name, 'form':form}) 
     return render(request=request, template_name='master-detail.html', context={'master':master, 'master-names':master_names, 'records':records, 'records_name':records_name, 'form':form})
 
-def print_to_excel(request, pk):
+def PrintToExcelView(request, pk):
     
     records = Detail.objects.filter(master_plan=pk)
 
@@ -254,7 +254,7 @@ def print_to_excel(request, pk):
         row_number += 1
 
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-    response['Content-Disposition'] = 'attachment; filename=Master Plan.xlsx'
+    response['Content-Disposition'] = 'attachment; filename=Plan Maestro.xlsx'
     workbook.save(response)
 
     return response
@@ -330,7 +330,7 @@ def PrintFilterToExcelView(request):
             row_number += 1
 
         response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-        response['Content-Disposition'] = 'attachment; filename=Master Plan.xlsx'
+        response['Content-Disposition'] = 'attachment; filename=Plan Maestro.xlsx'
         workbook.save(response)
     else:
         message = "Debes de filtrar la información antes de imprimir un filtro"
@@ -567,8 +567,17 @@ def DeleteResponsibleView(request, pk):
 def ListMasterPlanView(request):
     request.session['previous_url'] = request.get_full_path()
 
-    records = MasterPlan.objects.all()
+    # records = MasterPlan.objects.all()
     records_name = MasterPlan._meta.fields
+
+    if is_admin(request.user) == True:
+        records = MasterPlan.objects.all()
+    else:
+        records = MasterPlan.objects.filter(
+            Q(detail__goal_manager_id=request.user.id) |
+            Q(detail__activity_manager_id=request.user.id) |
+            Q(detail__supervision_manager_id=request.user.id)
+        ).distinct()
 
     for instance in records:
         instance.status = dict(master_plan_status)[instance.status]

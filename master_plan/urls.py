@@ -24,7 +24,7 @@ urlpatterns = [
     path('login/', views.LoginView, name='login'),
     path('logout/', views.LogoutView, name='log-out'),
     path('print/excel/', views.PrintFilterToExcelView, name='print-filter-excel'),
-    path('print/excel/<int:pk>/', views.print_to_excel, name='print-excel'),
+    path('print/excel/<int:pk>/', views.PrintToExcelView, name='print-excel'),
 
     path('work/axe/', views.ListComponentView, name='work-axe'),
     path('work/axe/create/', views.CreateComponentView, name='work-axe-create'),

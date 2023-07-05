@@ -12,7 +12,7 @@
   <title>Registros</title>
   <style>
     #bg-complete {
-      background: #52b788; /* Color de fondo personalizado */
+      background: #52b788;
     }
     
     .container-fluid,
@@ -35,55 +35,46 @@
 
   <table class="table" id="tabla">
     <thead>
-        {% for field in records_name %}
-            <!-- {% if forloop.counter0|divisibleby:6 %}
-                <tr>
-            {% endif %} -->
-            <th scope="col" class="text-center fs-5">{{ field.verbose_name }}</th>
-            <!-- {% if forloop.counter0|add:1 == records_name|length %} -->
-            <th scope="col" class="text-center fs-5">Acciones</th>
-                <!-- </tr>
-            {% endif %} -->
-        {% endfor %}
+      {% for field in records_name %}
+        <th scope="col" class="text-center fs-5">{{ field.verbose_name }}</th>
+      {% endfor %}
+      <th scope="col" class="text-center fs-5">Acciones</th>
     </thead>
     <tbody>
-        {% for record in records %}
-          <tr>
-            {% for field in records_name %}
-              <!--{% if forloop.counter0|divisibleby:6 %}
-                  <tr>
-                {% endif %} -->
-                {% if record.status == 'Completado' %}
-                    <td scope="col" class="text-center text-white" id="bg-complete">{{ record|getattr_filter:field.name }}</td>
-                {% else %}
-                    <td scope="col" class="text-center">{{ record|getattr_filter:field.name }}</td>
+      {% for record in records %}
+        <tr>
+          {% for field in records_name %}
+            {% if record.status == 'Completado' %}
+                <td scope="col" class="text-center text-white" id="bg-complete">{{ record|getattr_filter:field.name }}</td>
+            {% else %}
+                <td scope="col" class="text-center">{{ record|getattr_filter:field.name }}</td>
+            {% endif %}
+          {% endfor %}
+          {% if record.status == 'Completado' %}
+            <td class="col text-center" id="bg-complete">
+              <a href='{{ request.build_absolute_uri }}update/{{record.pk}}/' class="page-link border-0 bg-success text-white d-inline-block p-1 mx-2 mb-1 btn">Modificar</a>
+              <a href='{{ request.build_absolute_uri }}delete/{{record.pk}}/' class="page-link border-0 bg-danger text-white d-inline-block p-1 mx-2 mb-1 btn">Eliminar</a>
+              {% if 'detail/' in request.path %}
+                <a href='{{ request.scheme }}://{{ request.get_host }}/detail/info/{{record.pk}}/' class="page-link border-0 bg-warning text-white d-inline-block py-1 px-2 mx-2 mb-1 btn">Ver</a></button>
+              {% endif %}
+            </td>
+          {% else %}
+            <td class="col text-center">
+              {% if request.path == '/' %}
+                <a href='{{ request.build_absolute_uri }}master/plan/details/{{record.id}}/' class="page-link border-0 bg-warning text-white d-inline-block py-1 px-2 mx-2 mb-1 btn">Ver</a></button>
+                <a href='{{ request.build_absolute_uri }}master/plan/update/{{record.pk}}/' class="page-link border-0 bg-success text-white d-inline-block p-1 mx-2 mb-1 btn">Modificar</a>
+                <a href='{{ request.build_absolute_uri }}master/plan/delete/{{record.pk}}/' class="page-link border-0 bg-danger text-white d-inline-block p-1 mx-2 mb-1 btn">Eliminar</a>
+              {% else %}
+                <a href='{{ request.build_absolute_uri }}update/{{record.pk}}/' class="page-link border-0 bg-success text-white d-inline-block p-1 mx-2 mb-1 btn">Modificar</a>
+                <a href='{{ request.build_absolute_uri }}delete/{{record.pk}}/' class="page-link border-0 bg-danger text-white d-inline-block p-1 mx-2 mb-1 btn">Eliminar</a>
+                {% if 'detail/' in request.path %}
+                  <a href='{{ request.scheme }}://{{ request.get_host }}/detail/info/{{record.pk}}/' class="page-link border-0 bg-warning text-white d-inline-block py-1 px-2 mx-2 mb-1 btn">Ver</a></button>
                 {% endif %}
-                <!-- {% if forloop.counter0|add:1 == records_name|length %}   -->
-                {% if record.status == 'Completado' %}
-                    <td class="col text-center" id="bg-complete">
-                      <a href='{{ request.build_absolute_uri }}update/{{record.pk}}/' class="page-link border-0 bg-success text-white d-inline-block p-1 mx-2 mb-1 btn">Modificar</a>
-                      <a href='{{ request.build_absolute_uri }}delete/{{record.pk}}/' class="page-link border-0 bg-danger text-white d-inline-block p-1 mx-2 mb-1 btn">Eliminar</a>
-                      {% if 'detail/' in request.path %}
-                        <a href='{{ request.scheme }}://{{ request.get_host }}/detail/info/{{record.pk}}/' class="page-link border-0 bg-warning text-white d-inline-block py-1 px-2 mx-2 mb-1 btn">Ver</a></button>
-                      {% endif %}
-                    </td>
-                {% else %}
-                  <td class="col text-center">
-                    {% if request.path == '/' %}
-                      <a href='{{ request.build_absolute_uri }}master/plan/details/{{record.id}}/' class="page-link border-0 bg-warning text-white d-inline-block py-1 px-2 mx-2 mb-1 btn">Ver</a></button>
-                    {% endif %}
-                      <a href='{{ request.build_absolute_uri }}update/{{record.pk}}/' class="page-link border-0 bg-success text-white d-inline-block p-1 mx-2 mb-1 btn">Modificar</a>
-                      <a href='{{ request.build_absolute_uri }}delete/{{record.pk}}/' class="page-link border-0 bg-danger text-white d-inline-block p-1 mx-2 mb-1 btn">Eliminar</a>
-                      {% if 'detail/' in request.path %}
-                        <a href='{{ request.scheme }}://{{ request.get_host }}/detail/info/{{record.pk}}/' class="page-link border-0 bg-warning text-white d-inline-block py-1 px-2 mx-2 mb-1 btn">Ver</a></button>
-                      {% endif %}
-                  </td>
-                {% endif %} 
-                    <!-- </tr>
-                {% endif %} -->
-            {% endfor %}
-          </tr>
-        {% endfor %}
+              {% endif %}
+            </td>
+          {% endif %} 
+        </tr>
+      {% endfor %}
     </tbody>
   </table>
 
