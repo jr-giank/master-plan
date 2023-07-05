@@ -13,7 +13,7 @@
         <title>Plan Maestro</title>
     <style>
         #bg-complete {
-            background: #52b788; /* Color de fondo personalizado */
+            background: #52b788;
         }
 
         .container-fluid,
@@ -55,7 +55,8 @@
                 {% if request.user.role == 'A' %}
                     <a href="{% url 'master-detail-create' master.id %}" class="page-link border-0 bg-info text-white d-inline-block py-1 px-2 btn">Agregar</a></button>
                 {% endif %}
-                <a class="page-link border-0 bg-secondary text-white d-inline-block py-1 px-2 btn" onclick="exportTableToExcel()">Imprimir</a></button>
+                <a href="{% url 'print_to_excel' master.id %}" class="page-link border-0 bg-secondary text-white d-inline-block py-1 px-2 btn">Imprimir</a></button>
+                <a class="page-link border-0 bg-secondary text-white d-inline-block py-1 px-2 btn" onclick="exportTableToExcel()">Imprimir Filtrado</a></button>
             </div>
         </div>
         <div class="row">
@@ -237,7 +238,7 @@
                 for (var j = 0; j < celdasHTML.length; j++) {
                     var valorCelda = celdasHTML[j].innerText;
 
-                    if(valorCelda != 'Modificar Eliminar'){
+                    if(valorCelda != 'Modificar Eliminar Ver'){
                         hoja.getCell(String.fromCharCode(65 + j) + (i + 1)).value = valorCelda;
                     }
                 }
