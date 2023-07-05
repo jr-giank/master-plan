@@ -13,7 +13,7 @@
         <title>Plan Maestro</title>
     <style>
         #bg-complete {
-            background: #52b788; /* Color de fondo personalizado */
+            background: #52b788;
         }
 
         .container-fluid,
@@ -55,7 +55,8 @@
                 {% if request.user.role == 'A' %}
                     <a href="{% url 'master-detail-create' master.id %}" class="page-link border-0 bg-info text-white d-inline-block py-1 px-2 btn">Agregar</a></button>
                 {% endif %}
-                <a class="page-link border-0 bg-secondary text-white d-inline-block py-1 px-2 btn" onclick="exportTableToExcel()">Imprimir</a></button>
+                <a href="{% url 'print-excel' master.id %}" class="page-link border-0 bg-secondary text-white d-inline-block py-1 px-2 btn">Imprimir</a></button>
+                <a href="{% url 'print-filter-excel' %}" class="page-link border-0 bg-secondary text-white d-inline-block py-1 px-2 btn">Imprimir filtrado</a></button>
             </div>
         </div>
         <div class="row">
@@ -143,49 +144,33 @@
     <table class="table" id="tabla">
         <thead>
             {% for field in records_name %}
-                <!-- {% if forloop.counter0|divisibleby:7 %}
-                    <tr>
-                {% endif %} -->
                 <th scope="col" class="text-center fs-5">{{ field.verbose_name }}</th>
-                <!-- {% if forloop.counter0|add:1 == records_name|length %} -->
-                <th scope="col" class="text-center fs-5">Acciones</th>
-                    <!-- </tr> -->
-                <!-- {% endif %} -->
             {% endfor %}
+            <th scope="col" class="text-center fs-5">Acciones</th>
         </thead>
         <tbody>
             {% for record in records %}
                 <tr>
                     {% for field in records_name %}
-                        <!-- {% if forloop.counter0|divisibleby:7 %}
-                            <tr>
-                        {% endif %} -->
                         {% if record.status == 'Completado' %}
                             <td scope="col" class="text-center text-white" id="bg-complete">{{ record|getattr_filter:field.name }}</td>
                         {% else %}
                             <td scope="col" class="text-center">{{ record|getattr_filter:field.name }}</td>
                         {% endif %}
-                        <!-- {% if forloop.counter0|add:1 == records_name|length %}   -->
-                        {% if record.status == 'Completado' %}
-                            <td class="col text-center" id="bg-complete">
-                                <a href='{{ request.scheme }}://{{ request.META.HTTP_HOST }}/detail/update/{{record.pk}}/' class="page-link border-0 bg-success text-white d-inline-block p-1 mx-2 mb-1 btn">Modificar</a>
-                                <a href='{{ request.scheme }}://{{ request.META.HTTP_HOST }}/detail/delete/{{record.pk}}/' class="page-link border-0 bg-danger text-white d-inline-block p-1 mx-2 mb-1 btn">Eliminar</a>
-                                {% if 'master/plan/details' in request.path %}
-                                    <a href='{{ request.scheme }}://{{ request.get_host }}/detail/info/{{record.pk}}/' class="page-link border-0 bg-warning text-white d-inline-block py-1 px-2 mx-2 mb-1 btn">Ver</a></button>
-                                {% endif %}
-                            </td>
-                        {% else %}
-                            <td class="col text-center">
-                                <a href='{{ request.scheme }}://{{ request.META.HTTP_HOST }}/detail/update/{{record.pk}}/' class="page-link border-0 bg-success text-white d-inline-block p-1 mx-2 mb-1 btn">Modificar</a>
-                                <a href='{{ request.scheme }}://{{ request.META.HTTP_HOST }}/detail/delete/{{record.pk}}/' class="page-link border-0 bg-danger text-white d-inline-block p-1 mx-2 mb-1 btn">Eliminar</a>
-                                {% if 'master/plan/details' in request.path %}
-                                    <a href='{{ request.scheme }}://{{ request.get_host }}/detail/info/{{record.pk}}/' class="page-link border-0 bg-warning text-white d-inline-block py-1 px-2 mx-2 mb-1 btn">Ver</a></button>
-                                {% endif %}
-                            </td>
-                        {% endif %} 
-                            <!-- </tr> -->
-                        <!-- {% endif %} -->
                     {% endfor %}
+                    {% if record.status == 'Completado' %}
+                        <td class="col text-center" id="bg-complete">
+                            <a href='{{ request.scheme }}://{{ request.META.HTTP_HOST }}/detail/update/{{record.pk}}/' class="page-link border-0 bg-success text-white d-inline-block p-1 mx-2 mb-1 btn">Modificar</a>
+                            <a href='{{ request.scheme }}://{{ request.META.HTTP_HOST }}/detail/delete/{{record.pk}}/' class="page-link border-0 bg-danger text-white d-inline-block p-1 mx-2 mb-1 btn">Eliminar</a>
+                            <a href='{{ request.scheme }}://{{ request.get_host }}/detail/info/{{record.pk}}/' class="page-link border-0 bg-warning text-white d-inline-block py-1 px-2 mx-2 mb-1 btn">Ver</a></button>
+                        </td>
+                    {% else %}
+                        <td class="col text-center">
+                            <a href='{{ request.scheme }}://{{ request.META.HTTP_HOST }}/detail/update/{{record.pk}}/' class="page-link border-0 bg-success text-white d-inline-block p-1 mx-2 mb-1 btn">Modificar</a>
+                            <a href='{{ request.scheme }}://{{ request.META.HTTP_HOST }}/detail/delete/{{record.pk}}/' class="page-link border-0 bg-danger text-white d-inline-block p-1 mx-2 mb-1 btn">Eliminar</a>
+                            <a href='{{ request.scheme }}://{{ request.get_host }}/detail/info/{{record.pk}}/' class="page-link border-0 bg-warning text-white d-inline-block py-1 px-2 mx-2 mb-1 btn">Ver</a></button>
+                        </td>
+                    {% endif %} 
                 </tr>
             {% endfor %}
         </tbody>
@@ -197,62 +182,6 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    
-    <script src="https://unpkg.com/exceljs/dist/exceljs.min.js"></script>
-    <script>
-        async function exportTableToExcel() {
-            // Tabla HTML
-            var tablaHTML = document.getElementById('tabla');
-            
-            var excel = new ExcelJS.Workbook();
-            var hoja = excel.addWorksheet('Master Data');
-
-            var sombreado = {
-                type: 'pattern',
-                pattern: 'solid',
-                fgColor: { argb: '52b788' } 
-            };
-
-            // Titulo de las columnas
-            var filasHTML = tablaHTML.getElementsByTagName('tr');
-            for (var i = 0; i < filasHTML.length; i++) {
-                var celdasHTML = filasHTML[i].getElementsByTagName('th');
-                
-                for (var j = 0; j < celdasHTML.length; j++) {
-                    var valorCelda = celdasHTML[j].innerText;
-                    
-                    if(valorCelda != 'Acciones'){
-                        var celda = hoja.getCell(String.fromCharCode(65 + j) + (i + 1)).value = valorCelda;   
-                        celda.value = valorCelda;
-                        celda.fill = sombreado
-                    }          
-                }
-            }
-            
-            // Valores de las columnas
-            var filasHTML = tablaHTML.getElementsByTagName('tr');
-            for (var i = 0; i < filasHTML.length; i++) {
-                var celdasHTML = filasHTML[i].getElementsByTagName('td');
-
-                for (var j = 0; j < celdasHTML.length; j++) {
-                    var valorCelda = celdasHTML[j].innerText;
-
-                    if(valorCelda != 'Modificar Eliminar'){
-                        hoja.getCell(String.fromCharCode(65 + j) + (i + 1)).value = valorCelda;
-                    }
-                }
-            }
-
-            var buffer = await excel.xlsx.writeBuffer();
-            var blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-            var url = window.URL.createObjectURL(blob);
-            var link = document.createElement('a');
-            link.href = url;
-            link.download = 'Plan-Maestro.xlsx';
-            link.click();
-            window.URL.revokeObjectURL(url);
-        }
-    </script>
 
 </body>
 

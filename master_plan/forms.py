@@ -2,6 +2,12 @@ from django import forms
 from django.forms.widgets import DateInput
 from .models import CustomUser, Component, Activitie, MasterPlan, master_plan_status, detail_status
 
+detail_status_filter = [
+    ('C', '-------------'),
+    ('A', 'No Completado'),
+    ('B', 'Completado')
+]
+
 class SignUpForm(forms.Form):
     
     first_name = forms.CharField(
@@ -301,7 +307,7 @@ class FilterForm(forms.Form):
         })
     status = forms.ChoiceField(
         label='Estado', 
-        choices=detail_status,
+        choices=detail_status_filter,
         required=False,
         error_messages={
             'required': 'Este campo es requerido.',
